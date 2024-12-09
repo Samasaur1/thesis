@@ -26,7 +26,7 @@
       date = flockenzeit.lib.ISO-8601 self.lastModified;
     in {
       packages = define (pkgs: {
-        thesis = pkgs.callPackage ./thesis { inherit rev date; };
+        thesis = pkgs.callPackage ./thesis { inherit rev date; inherit (pkgs.lib) getExe; };
       });
       
       devShells = define (pkgs: {
