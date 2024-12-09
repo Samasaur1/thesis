@@ -2,9 +2,11 @@
 
 # Git revisions
 
-This document was built off of commit `%rev%` (%date%).
+This document was built off of commit \texttt{\rev} (\latestRevisionDate).
 
 The revisions of the code I wrote are as follows:
-- BencodeKit: `%shortRev%`
+
+BencodeKit
+:   \texttt{\shortRev}
 
 (etc.)
