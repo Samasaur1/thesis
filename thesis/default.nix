@@ -5,8 +5,6 @@ runCommandNoCC "thesis.pdf" {} ''
     --defaults ${./options.yaml} \
     --metadata-file ${./metadata.yaml} \
     -M rev=${rev} -M date=${date} \
-    --template ${./reedthesis/template.tex}
-    ${./chapters}/*.md -o thesis.pdf
-
-  mv thesis.pdf $out
+    --template ${./reedthesis/template.tex} \
+    ${./chapters}/*.md -o $out
 ''
