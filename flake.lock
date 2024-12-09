@@ -1,10 +1,25 @@
 {
   "nodes": {
+    "flockenzeit": {
+      "locked": {
+        "lastModified": 1671185345,
+        "narHash": "sha256-+5IWi+iJAYcRxvLN15hKO2hVwNokfN3U+lvWf/zFtCg=",
+        "owner": "balsoft",
+        "repo": "Flockenzeit",
+        "rev": "90abba65671690d95b5d28ce6dd8de7959aa1339",
+        "type": "github"
+      },
+      "original": {
+        "owner": "balsoft",
+        "repo": "Flockenzeit",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 0,
-        "narHash": "sha256-PmUr/2GQGvFTIJ6/Tvsins7Q43KTMvMFhvG6oaYK+Wk=",
-        "path": "/nix/store/hiasfhl8f5yy88hcfbr3s8s4bm63wsjw-source",
+        "narHash": "sha256-t4BBVpwG9B4hLgc6GUBuj3cjU7lP/PJfpTHuSqE+crk=",
+        "path": "/nix/store/ab78nf3ad8ly49zfyd3igw3f2n5q7fz4-source",
         "type": "path"
       },
       "original": {
@@ -14,6 +29,7 @@
     },
     "root": {
       "inputs": {
+        "flockenzeit": "flockenzeit",
         "nixpkgs": "nixpkgs"
       }
     }
