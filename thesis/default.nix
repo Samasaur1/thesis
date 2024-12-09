@@ -1,6 +1,8 @@
-{ rev, date, pandoc, getExe, runCommandNoCC, ... }:
+{ rev, date, pandoc, texliveFull, getExe, runCommandNoCC, ... }:
 
 runCommandNoCC "thesis.pdf" {} ''
+  export PATH="${texliveFull}/bin:$PATH"
+
   ${getExe pandoc} \
     --defaults ${./options.yaml} \
     --metadata-file ${./metadata.yaml} \
