@@ -2,9 +2,7 @@ local vars = {}
 
 function get_vars (meta)
   for k, v in pairs(meta) do
-    if pandoc.utils.type(v) == 'Inlines' then
-      vars["%" .. k .. "%"] = {table.unpack(v)}
-    end
+    vars[k] = v
   end
 end
 
