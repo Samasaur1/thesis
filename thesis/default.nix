@@ -13,7 +13,7 @@ let
        '')
     ];
 
-    unpackPhase = "";
+    dontUnpack = true;
 
     installPhase = ''
       runHook preInstall
