@@ -1,4 +1,4 @@
-{ rev, date, pandoc, texliveFull, getExe, runCommandNoCC, stdenvNoCC, writeShellScript, ... }:
+{ rev, shortRev, date, pandoc, texliveFull, getExe, runCommandNoCC, stdenvNoCC, writeShellScript, ... }:
 
 let
   thesisClass = stdenvNoCC.mkDerivation {
@@ -37,7 +37,7 @@ runCommandNoCC "thesis.pdf" {} ''
   ${getExe pandoc} \
     --defaults ${./options.yaml} \
     --metadata-file ${./metadata.yaml} \
-    -M rev=${rev} -M date=${date} \
+    -M rev=${rev} -M shortRev=${shortRev} -M date=${date} \
     --template ${./reedthesis/template.tex} \
     ${./chapters}/*.md -o $out
 ''
