@@ -4,7 +4,7 @@ pkgs.stdenvNoCC.mkDerivation {
   pname = "reedthesis";
   version = "1.0.0";
 
-  src = ./reedthesis/reedthesis.cls;
+  src = ./reedthesis.cls;
 
   outputs = [ "tex" ];
 
