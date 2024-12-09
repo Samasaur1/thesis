@@ -29,16 +29,8 @@
         thesis = pkgs.callPackage ./thesis { inherit rev date; inherit (self) shortRev; inherit (pkgs.lib) getExe; };
       });
       
-      devShells = define (pkgs: {
-        default = pkgs.mkShell {
-          packages = [ pkgs.pandoc ];
-
-          name = "sam's thesis shell";
-
-          shellHook = ''
-            echo "Thanks for building my thesis!"
-          '';
-        };
+      devShells = define(pkgs: {
+        thesis = pkgs.callPackage ./thesis/shell.nix {};
       });
 
       formatter = define (pkgs: pkgs.nixfmt-rfc-style);

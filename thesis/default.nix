@@ -1,40 +1,13 @@
-{ rev, shortRev, date, pandoc, texliveFull, getExe, runCommandNoCC, stdenvNoCC, writeShellScript, ... }:
+{ rev, shortRev, date, pkgs, ... }:
 
 let
-  thesisClass = stdenvNoCC.mkDerivation {
-    pname = "reedthesis";
-    version = "1.0.0";
-
-    src = ./reedthesis/reedthesis.cls;
-
-    outputs = [ "tex" ];
-
-    nativeBuildInputs = [
-      (writeShellScript "force-tex-output.sh" ''
-       out="''${tex-}"
-       '')
-    ];
-
-    dontUnpack = true;
-
-    installPhase = ''
-      runHook preInstall
-
-      path="$tex/tex/latex/reedthesis"
-
-      mkdir -p "$path"
-
-      cp "$src" "$path/reedthesis.cls"
-
-      runHook postInstall
-    '';
-  };
+  thesisClass = pkgs.callPackage ./reedthesis {};
 in
 
-runCommandNoCC "thesis.pdf" {} ''
-  export PATH="${texliveFull.withPackages (_: [ thesisClass.tex ])}/bin:$PATH"
+pkgs.runCommandNoCC "thesis.pdf" {} ''
+  export PATH="${pkgs.texliveFull.withPackages (_: [ thesisClass.tex ])}/bin:$PATH"
 
-  ${getExe pandoc} \
+  ${pkgs.lib.getExe pkgs.pandoc} \
     --defaults ${./options.yaml} \
     --metadata-file ${./metadata.yaml} \
     -M rev=${rev} -M shortRev=${shortRev} -M date=${date} \
