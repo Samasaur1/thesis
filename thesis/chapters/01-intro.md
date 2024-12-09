@@ -1,3 +1,7 @@
 # Introduction
 
-\lipsum[20]
+\lipsum
+
+\lipsum
+
+\lipsum
