@@ -5,6 +5,8 @@ let
     pname = "reedthesis";
     version = "1.0.0";
 
+    src = ./reedthesis/reedthesis.cls;
+
     outputs = [ "tex" ];
 
     nativeBuildInputs = [
@@ -22,7 +24,7 @@ let
 
       mkdir -p "$path"
 
-      cp ${./reedthesis/reedthesis.cls} "$path/"
+      cp "$src" "$path/reedthesis.cls"
 
       runHook postInstall
     '';
