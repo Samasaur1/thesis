@@ -7,8 +7,6 @@ let
 
     outputs = [ "tex" ];
 
-    src = ./reedthesis.cls;
-
     nativeBuildInputs = [
       (writeShellScript "force-tex-output.sh" ''
        out="''${tex-}"
@@ -22,7 +20,7 @@ let
 
       mkdir -p "$path"
 
-      cp reedthesis.cls "$path/"
+      cp ${./reedthesis/reedthesis.cls} "$path/"
 
       runHook postInstall
     '';
@@ -36,6 +34,6 @@ runCommandNoCC "thesis.pdf" {} ''
     --defaults ${./options.yaml} \
     --metadata-file ${./metadata.yaml} \
     -M rev=${rev} -M date=${date} \
-    --template ${./template.tex} \
+    --template ${./reedthesis/template.tex} \
     ${./chapters}/*.md -o $out
 ''
