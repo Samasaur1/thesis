@@ -1,5 +1,4 @@
 to: pdf
 fail-if-warnings: true
 sandbox: true
-template: letter
 top-level-division: chapter
