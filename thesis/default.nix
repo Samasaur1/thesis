@@ -1,8 +1,5 @@
-{ rev, date, texliveFull, runCommandNoCC, ... }:
+{ rev, date, pandoc, getExe, runCommandNoCC, ... }:
 
-runCommandNoCC "output" {} ''
-  echo "This is my thesis" > $out
-  echo "It was built at ${date}" >> $out
-  echo "off of commit ${rev}" >> $out
-  echo "Running 'date' in the Nix build produces $(date)" >> $out
+runCommandNoCC "thesis.pdf" {} ''
+  ${getExe pandoc} --defaults ${./options.yaml} --metadata-file ${./metadata.yaml} -M rev=${rev} -M date=${date} ${./chapters}/*.md -o $out
 ''
