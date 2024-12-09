@@ -30,7 +30,7 @@ let
 in
 
 runCommandNoCC "thesis.pdf" {} ''
-  export PATH="${texliveFull.withPackages (_: [ thesisClass ])}/bin:$PATH"
+  export PATH="${texliveFull.withPackages (_: [ thesisClass.tex ])}/bin:$PATH"
 
   ${getExe pandoc} \
     --defaults ${./options.yaml} \
