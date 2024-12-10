@@ -114,14 +114,15 @@ $endif$
     $endif$
 
     {
-        % Don't color links in the table of contents
+        % Don't color links in the table of contents or other lists
         \hypersetup{hidelinks}
+
         \tableofcontents
+        % if you want a list of tables, optional
+        \listoftables
+        % if you want a list of figures, also optional
+        \listoffigures
     }
-% if you want a list of tables, optional
-    \listoftables
-% if you want a list of figures, also optional
-    \listoffigures
 
 % The abstract is not required if you're writing a creative thesis (but aren't they all?)
 % If your abstract is longer than a page, there may be a formatting issue.
