@@ -14,7 +14,7 @@ let
     src = ./.;
 
     buildInputs = [
-      pkgs.texliveBasic
+      (pkgs.texliveBasic.withPackages (ps: builtins.attrValues { inherit (ps) palatino; }))
       pkgs.pandoc
     ];
 
