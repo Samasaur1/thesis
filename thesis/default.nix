@@ -25,6 +25,7 @@ let
             etoolbox
             ocgx2
             media9
+            fancyvrb
             ;
         }
       ))
