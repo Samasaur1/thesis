@@ -3,3 +3,4 @@ fail-if-warnings: true
 sandbox: true
 top-level-division: chapter
 citeproc: true
+# numbersections: true
