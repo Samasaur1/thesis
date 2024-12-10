@@ -21,6 +21,8 @@ let
     buildPhase = ''
       DATE="$(TZ='America/Los_Angeles' ${pkgs.lib.getExe' pkgs.coreutils "date"} -d '@${toString lastModified}' +'%B %-d, %Y at %-I:%M%P (%z)')"
 
+      mkdir $out
+
       pandoc \
         --defaults options.yaml \
         --metadata-file metadata.yaml \
