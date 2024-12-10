@@ -37,9 +37,9 @@ let
 
       echo "Calculated last commit date of flake as $DATE"
 
-      readarray -d "" FILES < <(${pkgs.lib.getExe' pkgs.findutils "find"} thesis/chapters/ -name '*.md' -print0 | ${pkgs.lib.getExe' pkgs.coreutils "sort"} -z)
+      readarray -d "" FILES < <(${pkgs.lib.getExe' pkgs.findutils "find"} chapters/ -name '*.md' -print0 | ${pkgs.lib.getExe' pkgs.coreutils "sort"} -z)
 
-      echo "Detected ''${#FILES[@]} files"
+      echo "Detected ''${#FILES[@]} Markdown files"
 
       mkdir $out
 
