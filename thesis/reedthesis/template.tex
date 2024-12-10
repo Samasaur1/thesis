@@ -85,7 +85,8 @@ $endif$
 %%
 %% The fun begins:
 \begin{document}
-    \fancyfoot[LE]{\it Built off of \href{https://github.com/Samasaur1/thesis/commit/\commitRev}{commit {\fontfamily{cmtt}\selectfont\commitShortRev}}}
+    \renewcommand{\footrulewidth}{0.4pt}
+    \fancyfoot[LE]{\it Built off of \href{https://github.com/Samasaur1/thesis/commit/\commitRev}{commit {\fontfamily{cmtt}\selectfont\tt\commitShortRev}}}
 
   \maketitle
   \frontmatter % this stuff will be roman-numbered
