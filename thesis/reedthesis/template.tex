@@ -50,10 +50,6 @@
 \newcommand{\commitShortRev}{$commitShortRev$}
 \newcommand{\commitDate}{$commitDate$}
 
-% \href{https://github.com/Samasaur1/thesis/commit/\commitRev}{commit \commitShortRev}
-
-\fancyfoot[LE]{Built off of \href{https://github.com/Samasaur1/thesis/commit/\commitRev}{commit \commitShortRev}}
-
 % Syntax highlighting
 $if(highlighting-macros)$
   $highlighting-macros$
@@ -87,6 +83,12 @@ $endif$
 %%
 %% The fun begins:
 \begin{document}
+
+    % \href{https://github.com/Samasaur1/thesis/commit/\commitRev}{commit \commitShortRev}
+
+    % \fancyfoot[CE,CO]{Built off of commit $rev$ on $date$}
+    \fancyfoot[LE]{Built off of \href{https://github.com/Samasaur1/thesis/commit/\commitRev}{commit \commitShortRev}}
+    % \fancyfoot[LE]{Built off of commit \commitShortRev}
 
   \maketitle
   \frontmatter % this stuff will be roman-numbered
