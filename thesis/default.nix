@@ -14,7 +14,7 @@ let
     src = ./.;
 
     buildInputs = [
-      (pkgs.texliveBasic.withPackages (ps: builtins.attrValues { inherit (ps) palatino booktabs setspace lipsum; }))
+      (pkgs.texliveBasic.withPackages (ps: builtins.attrValues { inherit (ps) palatino booktabs setspace lipsum etoolbox; }))
       pkgs.pandoc
     ];
 
