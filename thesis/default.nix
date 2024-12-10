@@ -14,7 +14,7 @@ let
     src = ./.;
 
     buildInputs = [
-      (pkgs.texliveBasic.withPackages (ps: builtins.attrValues { inherit (ps) palatino; }))
+      (pkgs.texliveBasic.withPackages (ps: builtins.attrValues { inherit (ps) palatino booktabs; }))
       pkgs.pandoc
     ];
 
@@ -32,6 +32,6 @@ let
     '';
   };
 in
-  pkgs.runCommandNoCC "thesis.pdf" {} ''
+  pkgs.runCommandNoCC "thesis.pdf" { } ''
     ln -s ${thesis}/thesis.pdf $out
   ''
