@@ -14,7 +14,7 @@ let
     src = ./.;
 
     buildInputs = [
-      pkgs.texliveFull
+      pkgs.texliveBasic
       pkgs.pandoc
     ];
 
