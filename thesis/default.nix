@@ -12,7 +12,7 @@ let
       (pkgs.fetchpatch {
         name = "work-with-pandoc-3.patch";
         url = "https://github.com/TimothyElder/pandoc-xnos/commit/7dff9144cbafca882050fd534e7411e804b4e9b1.patch";
-        hash = pkgs.lib.fakeHash;
+        hash = "sha256-j6xaFXo3jtXGPL58aIp8RTqeQZhJ8cVKL/iUbUhXBF0=";
       })
     ];
   });
