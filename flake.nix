@@ -1,7 +1,11 @@
 {
   description = "My Reed College senior thesis";
 
-  outputs = { self, nixpkgs, ...}@inputs:
+  inputs = {
+    flockenzeit.url = "github:balsoft/Flockenzeit";
+  };
+
+  outputs = { self, nixpkgs, flockenzeit, ... }@inputs:
     let
       allSystems = nixpkgs.lib.systems.flakeExposed;
       forAllSystems = nixpkgs.lib.genAttrs allSystems;
@@ -19,21 +23,14 @@
         self.rev
       else
         throw "Refusing to build from a dirty Git tree!";
+      date = flockenzeit.lib.ISO-8601 self.lastModified;
     in {
       packages = define (pkgs: {
-        thesis = pkgs.callPackage ./thesis.nix { inherit rev; };
+        thesis = pkgs.callPackage ./thesis { inherit rev date; inherit (self) shortRev; inherit (pkgs.lib) getExe; };
       });
       
-      devShells = define (pkgs: {
-        default = pkgs.mkShell {
-          packages = [ pkgs.texliveFull ];
-
-          name = "sam's thesis shell";
-
-          shellHook = ''
-            echo "Thanks for building my thesis!"
-          '';
-        };
+      devShells = define(pkgs: {
+        thesis = pkgs.callPackage ./thesis/shell.nix {};
       });
 
       formatter = define (pkgs: pkgs.nixfmt-rfc-style);
