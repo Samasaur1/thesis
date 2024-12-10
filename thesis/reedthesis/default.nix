@@ -10,8 +10,8 @@ pkgs.stdenvNoCC.mkDerivation {
 
   nativeBuildInputs = [
     (pkgs.writeShellScript "force-tex-output.sh" ''
-     out="''${tex-}"
-     '')
+      out="''${tex-}"
+    '')
   ];
 
   dontUnpack = true;
