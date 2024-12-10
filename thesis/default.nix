@@ -14,22 +14,24 @@ let
     src = ./.;
 
     buildInputs = [
-      (pkgs.texliveBasic.withPackages (
-        ps:
-        builtins.attrValues {
-          inherit (ps)
-            palatino
-            booktabs
-            setspace
-            lipsum
-            etoolbox
-            ocgx2
-            media9
-            fancyvrb
-            ;
-        }
-      ))
+      # (pkgs.texliveBasic.withPackages (
+      #   ps:
+      #   builtins.attrValues {
+      #     inherit (ps)
+      #       palatino
+      #       booktabs
+      #       setspace
+      #       lipsum
+      #       etoolbox
+      #       ocgx2
+      #       media9
+      #       fancyvrb
+      #       ;
+      #   }
+      # ))
+      pkgs.texliveFull
       pkgs.pandoc
+      pkgs.python3Packages.pandoc-xnos
     ];
 
     buildPhase = ''
