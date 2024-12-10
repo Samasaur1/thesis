@@ -14,7 +14,21 @@ let
     src = ./.;
 
     buildInputs = [
-      pkgs.texliveFull
+      (pkgs.texliveBasic.withPackages (
+        ps:
+        builtins.attrValues {
+          inherit (ps)
+            palatino
+            booktabs
+            setspace
+            lipsum
+            etoolbox
+            ocgx2
+            media9
+            fancyvrb
+            ;
+        }
+      ))
       pkgs.pandoc
     ];
 
@@ -32,6 +46,6 @@ let
     '';
   };
 in
-  pkgs.runCommandNoCC "thesis.pdf" {} ''
+  pkgs.runCommandNoCC "thesis.pdf" { } ''
     ln -s ${thesis}/thesis.pdf $out
   ''
