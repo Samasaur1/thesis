@@ -13,7 +13,7 @@ in
 pkgs.runCommandNoCC "thesis.pdf" { } ''
   export PATH="${pkgs.texliveFull.withPackages (_: [ thesisClass.tex ])}/bin:$PATH"
 
-  DATE="$(${pkgs.lib.getExe' pkgs.coreutils "date"} -d '@${toString lastModified}' +'%B %-d, %Y at %-I:%M%P (%z)')"
+  DATE="$(TZ='America/Los_Angeles' ${pkgs.lib.getExe' pkgs.coreutils "date"} -d '@${toString lastModified}' +'%B %-d, %Y at %-I:%M%P (%z)')"
 
   ${pkgs.lib.getExe pkgs.pandoc} \
     --defaults ${./options.yaml} \
