@@ -16,10 +16,13 @@ jobs:
       - name: Build with Pandoc/LaTeX (via Nix)
         # Outputs to the './_site' directory by default
         run: nix build .#thesis
+      - name: Rename output file
+        run: |
+          ln -s result thesis.pdf
       - name: Upload artifact
         # Automatically uploads an artifact from the './_site' directory by default
         uses: actions/upload-artifact@v4
         with:
           name: thesis.pdf
-          path: ./result
+          path: ./thesis.pdf
           if-no-files-found: error
