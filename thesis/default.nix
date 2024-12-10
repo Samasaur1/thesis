@@ -10,7 +10,7 @@ pkgs.runCommandNoCC "thesis.pdf" {} ''
   ${pkgs.lib.getExe pkgs.pandoc} \
     --defaults ${./options.yaml} \
     --metadata-file ${./metadata.yaml} \
-    -M rev=${rev} -M shortRev=${shortRev} -M date=${date} \
+    -M commitRev=${rev} -M commitShortRev=${shortRev} -M commitDate=${date} \
     --template ${./reedthesis/template.tex} \
     ${./chapters}/*.md -o $out
 ''
