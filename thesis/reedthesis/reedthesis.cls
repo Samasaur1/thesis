@@ -9,6 +9,7 @@
 % Acknowledgements Page, David Perkinson & Sam Noble
 % May 2005 Patrick Carlisle Table of contents chapter definition
 % 2004-2005 Ben Salzberg (BTS) a variety of tweaks here and in the template
+% 2022-04-26 Sam Gauck   Make "big numbers" work in appendices as well as chapters
 %
 % Oddities:
 %
@@ -69,6 +70,42 @@
 		    \@afterindentfalse
 		    \secdef\@chapter\@schapter}
 		    
+		    
+% from batess thesis, from Sterling Paramour's mods:
+%\newfont{\reallyfuckinbig}{CoelacanthBold-osf-ot1 scaled 20000}
+%\newfont{\reallyfuckinbig}{ptmb scaled 20000}
+\newfont{\reallyfuckinbig}{pplb scaled 20000}
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+\let\oldappendix\appendix
+\renewcommand{\appendix}{\oldappendix\@inappendixtrue}
+\newif\if@inappendix
+
+\def\@makechapterhead#1{%
+  {\parindent \z@ \raggedleft \normalfont
+    \ifnum \c@secnumdepth >\m@ne
+%      \if@mainmatter
+        \large \bfseries
+        \if@inappendix
+        A~P~P~E~N~D~I~X \hspace{0.5cm}
+        \else
+        C~H~A~P~T~E~R \hspace{0.5cm}
+        \fi
+        \baselineskip 30pt
+        \space \reallyfuckinbig \thechapter
+        \par\nobreak
+        \HRule
+        \par\nobreak
+        \vskip 5\p@
+%      \fi
+    \fi
+    \interlinepenalty\@M
+    \LARGE #1\par\nobreak
+    \HRule
+    \par\nobreak
+    \vskip 40\p@
+  }}
+
 % Stolen from book.cls PBC 5/12/05
 % Using this to actually show "Chapter 1" in TOC instead of "1"
 \def\@chapter[#1]#2{\ifnum \c@secnumdepth >\m@ne
