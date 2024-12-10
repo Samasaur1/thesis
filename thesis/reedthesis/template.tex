@@ -85,12 +85,7 @@ $endif$
 %%
 %% The fun begins:
 \begin{document}
-
-    % \href{https://github.com/Samasaur1/thesis/commit/\commitRev}{commit \commitShortRev}
-
-    % \fancyfoot[CE,CO]{Built off of commit $rev$ on $date$}
-    \fancyfoot[LE]{\it Built off of \href{https://github.com/Samasaur1/thesis/commit/\commitRev}{commit \commitShortRev}}
-    % \fancyfoot[LE]{Built off of commit \commitShortRev}
+    \fancyfoot[LE]{\it Built off of \href{https://github.com/Samasaur1/thesis/commit/\commitRev}{commit \texttt{\commitShortRev}}}
 
   \maketitle
   \frontmatter % this stuff will be roman-numbered
@@ -117,7 +112,8 @@ $endif$
     $endif$
 
     {
-        \hypersetup[hidelinks]
+        % Don't color links in the table of contents
+        \hypersetup{hidelinks}
         \tableofcontents
     }
 % if you want a list of tables, optional
