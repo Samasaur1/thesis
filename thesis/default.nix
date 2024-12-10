@@ -35,9 +35,15 @@ let
     buildPhase = ''
       DATE="$(TZ='America/Los_Angeles' ${pkgs.lib.getExe' pkgs.coreutils "date"} -d '@${toString lastModified}' +'%B %-d, %Y at %-I:%M%P (%z)')"
 
+      echo "Calculated last commit date of flake as $DATE"
+
       readarray -d "" FILES < <(${pkgs.lib.getExe' pkgs.findutils "find"} thesis/chapters/ -name '*.md' -print0 | ${pkgs.lib.getExe' pkgs.coreutils "sort"} -z)
 
+      echo "Detected ''${#FILES[@]} files"
+
       mkdir $out
+
+      echo "Created output directory"
 
       pandoc \
         --defaults options.yaml \
@@ -45,6 +51,8 @@ let
         -M commitRev=${rev} -M commitShortRev=${shortRev} -M "commitDate=''${DATE}" \
         --template template.tex \
         "''${FILES[@]}" -o $out/thesis.pdf
+
+      echo "Generated thesis.pdf with Pandoc"
     '';
   };
 in
