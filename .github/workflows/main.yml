@@ -5,7 +5,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  # Build job
   build:
     runs-on: ubuntu-latest
     steps:
@@ -13,13 +12,13 @@ jobs:
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - name: Build with Pandoc/LaTeX (via Nix)
-        # Outputs to the './_site' directory by default
         run: nix build .#thesis
+        # Create a link to the output file **with the .pdf extension**
+        # Otherwise the artifact has no extension when downloaded (because `result` has no extension)
       - name: Rename output file
         run: |
           ln -s result thesis.pdf
       - name: Upload artifact
-        # Automatically uploads an artifact from the './_site' directory by default
         uses: actions/upload-artifact@v4
         with:
           name: thesis.pdf
