@@ -1,0 +1,25 @@
+name: Build latest thesis draft
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  # Build job
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - name: Build with Pandoc/LaTeX (via Nix)
+        # Outputs to the './_site' directory by default
+        run: nix build .#thesis
+      - name: Upload artifact
+        # Automatically uploads an artifact from the './_site' directory by default
+        uses: actions/upload-artifact@v4
+        with:
+          name: thesis
+          path: result
+          if-no-files-found: error
