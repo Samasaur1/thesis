@@ -35,14 +35,16 @@ let
     buildPhase = ''
       DATE="$(TZ='America/Los_Angeles' ${pkgs.lib.getExe' pkgs.coreutils "date"} -d '@${toString lastModified}' +'%B %-d, %Y at %-I:%M%P (%z)')"
 
+      readarray -d "" FILES < <(${pkgs.lib.getExe' pkgs.findutils "find"} thesis/chapters/ -name '*.md' -print0 | ${pkgs.lib.getExe' pkgs.coreutils "sort"} -z)
+
       mkdir $out
 
       pandoc \
         --defaults options.yaml \
         --metadata-file metadata.yaml \
-        -M commitRev=${rev} -M commitShortRev=${shortRev} -M "commitDate=$DATE" \
+        -M commitRev=${rev} -M commitShortRev=${shortRev} -M "commitDate=''${DATE}" \
         --template template.tex \
-        chapters/*.md -o $out/thesis.pdf
+        "''${FILES[@]}" -o $out/thesis.pdf
     '';
   };
 in
