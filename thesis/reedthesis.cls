@@ -82,7 +82,7 @@
 \newif\if@inappendix
 
 \def\@makechapterhead#1{%
-    \if@inappendix\relax\else\vspace*{10\p@}\fi%
+    \if@inappendix\relax\else\vspace*{3\p@}\fi%
   {\parindent \z@ \raggedleft \normalfont
     \ifnum \c@secnumdepth >\m@ne
 %      \if@mainmatter
