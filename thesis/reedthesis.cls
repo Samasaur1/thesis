@@ -106,16 +106,8 @@
     \vskip 40\p@
   }}
 
-% % \def\@bibhead#1{%
-% %   \vspace*{50\p@}%
-% %   {\parindent \z@ \raggedright
-% %     \normalfont
-% %     \interlinepenalty\@M
-% %     \Huge \bfseries  #1\par\nobreak
-% %     \vskip 40\p@
-% %   }}
 \def\@bibhead{%
-  \vspace*{90\p@}%
+  \vspace*{110\p@}%
   {\parindent \z@ \raggedleft
     \normalfont
     \interlinepenalty\@M
@@ -126,14 +118,6 @@
     \par\nobreak
     \vskip 40\p@
   }}
-% \def\@bibhead{%
-%     \vspace*{80\p@}%
-%     {\parindent \z@ \raggedleft \normalfont
-%         \large \bfseries
-%         Hello, world!
-%         \par\nobreak
-%         \HRule
-%     }
 
 \newcommand{\beginbib}{\if@openright\cleardoublepage\else\clearpage\fi
                     \thispagestyle{plain}%
