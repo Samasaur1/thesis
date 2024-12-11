@@ -107,7 +107,7 @@
   }}
 
 \def\@bibhead{%
-  \vspace*{110\p@}%
+  \vspace*{120\p@}%
   {\parindent \z@ \raggedleft
     \normalfont
     \interlinepenalty\@M
@@ -119,8 +119,8 @@
     \vskip 40\p@
   }}
 
-\newcommand{\beginbib}{\if@openright\cleardoublepage\else\clearpage\fi
-                    \thispagestyle{plain}%
+\newcommand{\beginbib}{\if@openright\RTcleardoublepage\else\clearpage\fi
+                    \thispagestyle{empty}%
                     \global\@topnum\z@
                     \@afterindentfalse
                     \if@twocolumn
