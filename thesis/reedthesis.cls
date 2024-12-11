@@ -132,9 +132,9 @@
                     \global\@topnum\z@
                     \@afterindentfalse
                     \if@twocolumn
-                        \@topnewpage[\@bibhead]%
+                        \@topnewpage[\@bibhead{}]%
                     \else
-                        \@bibhead%
+                        \@bibhead{}%
                         \@afterheading
                     \fi}
 
