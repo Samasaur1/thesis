@@ -106,26 +106,27 @@
     \vskip 40\p@
   }}
 
-% \def\@bibhead#1{%
-%   \vspace*{50\p@}%
-%   {\parindent \z@ \raggedright
+% % \def\@bibhead#1{%
+% %   \vspace*{50\p@}%
+% %   {\parindent \z@ \raggedright
+% %     \normalfont
+% %     \interlinepenalty\@M
+% %     \Huge \bfseries  #1\par\nobreak
+% %     \vskip 40\p@
+% %   }}
+% \def\@bibhead{%
+%   \vspace*{70\p@}%
+%   {\parindent \z@ \raggedleft
 %     \normalfont
 %     \interlinepenalty\@M
-%     \Huge \bfseries  #1\par\nobreak
+%     \large \bfseries
+%     B~I~B~L~I~O~G~R~A~P~H~Y \hspace{0.5cm}
+%     \par\nobreak
+%     \Hrule
+%     \par\nobreak
 %     \vskip 40\p@
 %   }}
-\def\@bibhead{%
-  \vspace*{70\p@}%
-  {\parindent \z@ \raggedleft
-    \normalfont
-    \interlinepenalty\@M
-    \large \bfseries
-    B~I~B~L~I~O~G~R~A~P~H~Y \hspace{0.5cm}
-    \par\nobreak
-    \Hrule
-    \par\nobreak
-    \vskip 40\p@
-  }}
+\def\@bibhead{Hello, world!}
 
 \newcommand{\beginbib}{\if@openright\cleardoublepage\else\clearpage\fi
                     \thispagestyle{plain}%
