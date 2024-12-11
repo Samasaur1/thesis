@@ -130,15 +130,15 @@ $endif$
   \frontmatter % this stuff will be roman-numbered
   \pagestyle{empty} % this removes page numbers from the frontmatter
 
-% Acknowledgements (Acceptable American spelling) are optional
-% So are Acknowledgments (proper English spelling)
+  $if(acknowledgements)$
     \chapter*{Acknowledgements}
-	I want to thank a few people.
+    \input{acknowledgements}
+  $endif$
 
-% The preface is optional
-% To remove it, comment it out or delete it.
+  $if(preface)$
     \chapter*{Preface}
-	This is an example of a thesis setup to use the reed thesis document class.
+    \input{preface}
+  $endif$
 	
     % Only add a list of abbreviations if there are any abbreviations
     $if(abbreviations)$
@@ -161,13 +161,15 @@ $endif$
         \listoffigures
     }
 
-% The abstract is not required if you're writing a creative thesis (but aren't they all?)
-% If your abstract is longer than a page, there may be a formatting issue.
-    \chapter*{Abstract}
-	The preface pretty much says it all.
+    $if(abstract)$
+        \chapter*{Abstract}
+        \input{abstract}
+    $endif$
 	
-	\chapter*{Dedication}
-	You can have a dedication here if you wish.
+    $if(dedication)$
+        \chapter*{Dedication}
+        \input{dedication}
+    $endif$
 
   \mainmatter % here the regular arabic numbering starts
   \pagestyle{fancyplain} % turns page numbering back on

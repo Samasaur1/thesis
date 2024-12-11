@@ -46,8 +46,20 @@ let
 
       echo "Created output directory"
 
+      for f in {acknowledgements,preface,abstract,dedication}; do
+        pandoc \
+          --defaults common-options.yaml \
+          --defaults prelim-options.yaml \
+          --metadata-file metadata.yaml \
+          -M commitRev=${rev} -M commitShortRev=${shortRev} -M "commitDate=''${DATE}" \
+          "$f.md" -o "$f.tex"
+      done
+
+      echo "Generated prelim .tex files with Pandoc"
+
       pandoc \
-        --defaults options.yaml \
+        --defaults common-options.yaml \
+        --defaults final-options.yaml \
         --metadata-file metadata.yaml \
         -M commitRev=${rev} -M commitShortRev=${shortRev} -M "commitDate=''${DATE}" \
         --template template.tex \

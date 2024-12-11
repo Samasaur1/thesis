@@ -12,3 +12,7 @@ abbreviations:
 bibliography: bibliography.bib
 nocite: |
   @*
+acknowledgements: true
+preface: true
+abstract: true
+dedication: true
