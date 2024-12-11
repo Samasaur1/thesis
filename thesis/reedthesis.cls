@@ -122,7 +122,7 @@
     \large \bfseries
     B~I~B~L~I~O~G~R~A~P~H~Y \hspace{0.5cm}
     \par\nobreak
-    \Hrule
+    \HRule
     \par\nobreak
     \vskip 40\p@
   }}
