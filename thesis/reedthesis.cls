@@ -129,7 +129,8 @@
                     \else
                         \@bibhead{}%
                         \@afterheading
-                    \fi}
+                    \fi
+                    \addcontentsline{toc}{chapter}{Bibliography}}
 
 % Stolen from book.cls PBC 5/12/05
 % Using this to actually show "Chapter 1" in TOC instead of "1"
