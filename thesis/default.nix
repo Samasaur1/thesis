@@ -7,15 +7,6 @@
 }:
 
 let
-  xnos = pkgs.python3Packages.pandoc-xnos.overrideAttrs (old: {
-    patches = (old.patches or []) ++ [
-      (pkgs.fetchpatch {
-        name = "work-with-pandoc-3.patch";
-        url = "https://github.com/TimothyElder/pandoc-xnos/commit/7dff9144cbafca882050fd534e7411e804b4e9b1.patch";
-        hash = "sha256-j6xaFXo3jtXGPL58aIp8RTqeQZhJ8cVKL/iUbUhXBF0=";
-      })
-    ];
-  });
   thesis = pkgs.stdenv.mkDerivation {
     pname = "thesis";
     version = "0.1.0";
@@ -40,7 +31,6 @@ let
       # ))
       pkgs.texliveFull
       pkgs.pandoc
-      xnos
     ];
 
     buildPhase = ''

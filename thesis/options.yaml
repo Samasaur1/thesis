@@ -3,8 +3,4 @@ fail-if-warnings: true
 sandbox: true
 top-level-division: chapter
 citeproc: true
-filters:
-  - type: json
-    path: pandoc-xnos
-  - type: citeproc
 # numbersections: true
