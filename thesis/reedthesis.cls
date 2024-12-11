@@ -115,12 +115,14 @@
 %     \vskip 40\p@
 %   }}
 \def\@bibhead{%
-  \vspace*{50\p@}%
+  \vspace*{70\p@}%
   {\parindent \z@ \raggedleft
     \normalfont
     \interlinepenalty\@M
     \large \bfseries
     B~I~B~L~I~O~G~R~A~P~H~Y \hspace{0.5cm}
+    \par\nobreak
+    \Hrule
     \par\nobreak
     \vskip 40\p@
   }}
