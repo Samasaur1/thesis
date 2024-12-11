@@ -82,7 +82,7 @@
 \newif\if@inappendix
 
 \def\@makechapterhead#1{%
-    % \if@inappendix\relax\else\vspace*{0pt}\fi%
+    % \if@inappendix\relax\else\vspace*{0pt}\fi% %TODO: try to make chapters and appendices have the HRules at the same y axis
   {\parindent \z@ \raggedleft \normalfont
     \ifnum \c@secnumdepth >\m@ne
 %      \if@mainmatter
