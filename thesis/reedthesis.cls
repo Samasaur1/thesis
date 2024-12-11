@@ -89,6 +89,7 @@
         \if@inappendix
         A~P~P~E~N~D~I~X \hspace{0.5cm}
         \else
+        \vspace{5\p@}
         C~H~A~P~T~E~R \hspace{0.5cm}
         \fi
         \baselineskip 30pt
