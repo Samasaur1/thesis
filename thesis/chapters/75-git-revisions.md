@@ -1,5 +1,3 @@
-\appendix
-
 # Git revisions
 
 This document was built off of commit \texttt{\commitRev} (\commitDate).
