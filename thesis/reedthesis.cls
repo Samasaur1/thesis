@@ -127,7 +127,7 @@
     \vskip 40\p@
   }}
 
-\newcommand\beginbib{\if@openright\cleardoublepage\else\clearpage\fi
+\newcommand{\beginbib}{\if@openright\cleardoublepage\else\clearpage\fi
                     \thispagestyle{plain}%
                     \global\@topnum\z@
                     \@afterindentfalse
