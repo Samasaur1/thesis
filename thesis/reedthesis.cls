@@ -108,6 +108,7 @@
 
 \def\bibhead{%
   {\parindent \z@ \raggedleft \normalfont
+    \vskip 30\p@
     \large \bfseries
     B~I~B~L~I~O~G~R~A~P~H~Y \hspace{0.5cm}
     \baselineskip 30pt
