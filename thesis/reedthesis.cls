@@ -106,19 +106,35 @@
     \vskip 40\p@
   }}
 
-\def\bibhead{%
-  {\parindent \z@ \raggedleft \normalfont
-    \vskip 30\p@
+% \def\@bibhead#1{%
+%   \vspace*{50\p@}%
+%   {\parindent \z@ \raggedright
+%     \normalfont
+%     \interlinepenalty\@M
+%     \Huge \bfseries  #1\par\nobreak
+%     \vskip 40\p@
+%   }}
+\def\@bibhead#1{%
+  \vspace*{50\p@}%
+  {\parindent \z@ \raggedleft
+    \normalfont
+    \interlinepenalty\@M
     \large \bfseries
     B~I~B~L~I~O~G~R~A~P~H~Y \hspace{0.5cm}
-    \baselineskip 30pt
     \par\nobreak
-    \HRule
-    \par\nobreak
-    \vskip 5\p@
-    \interlinepenalty\@M
     \vskip 40\p@
   }}
+
+\newcommand\beginbib{\if@openright\cleardoublepage\else\clearpage\fi
+                    \thispagestyle{plain}%
+                    \global\@topnum\z@
+                    \@afterindentfalse
+                    \if@twocolumn
+                        \@topnewpage[\@bibhead{#1}]%
+                    \else
+                        \@bibhead{#1}%
+                        \@afterheading
+                    \fi}
 
 % Stolen from book.cls PBC 5/12/05
 % Using this to actually show "Chapter 1" in TOC instead of "1"

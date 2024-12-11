@@ -1,2 +1,2 @@
 \backmatter
-\bibhead
+\beginbib{this argumnent is ignored}
