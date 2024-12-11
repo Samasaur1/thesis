@@ -126,7 +126,10 @@
 %     \par\nobreak
 %     \vskip 40\p@
 %   }}
-\def\@bibhead{Hello, world!}
+\def\@bibhead{%
+    \vspace*{70\p@}%
+    Hello, world!%
+    }
 
 \newcommand{\beginbib}{\if@openright\cleardoublepage\else\clearpage\fi
                     \thispagestyle{plain}%
