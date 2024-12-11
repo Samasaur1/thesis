@@ -1,3 +1,11 @@
 # Test citation
 
-BitTorrent is complicated, but it's understandable if you read a good paper [@gauck]. This is what @-gauck -@gauck tried to produce in his paper in Computer Networks, which details the protocol.
+## Citations without pages:
+- full citation: [@gauck]
+- citation without author name: [-@gauck]
+- inline citation: @gauck
+
+## Citations with pages:
+- full citation: [@gauck, p. 2]
+- citation without author name: [-@gauck, p.2]
+- inline citations can't have locators
