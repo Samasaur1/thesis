@@ -114,7 +114,7 @@
 %     \Huge \bfseries  #1\par\nobreak
 %     \vskip 40\p@
 %   }}
-\def\@bibhead#1{%
+\def\@bibhead{%
   \vspace*{50\p@}%
   {\parindent \z@ \raggedleft
     \normalfont
@@ -130,9 +130,9 @@
                     \global\@topnum\z@
                     \@afterindentfalse
                     \if@twocolumn
-                        \@topnewpage[\@bibhead{#1}]%
+                        \@topnewpage[\@bibhead]%
                     \else
-                        \@bibhead{#1}%
+                        \@bibhead%
                         \@afterheading
                     \fi}
 
