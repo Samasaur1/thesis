@@ -1,6 +1,8 @@
+# Bencode
+
 At various points in the BitTorrent protocol, we need to translate conceptually structured information to binary data, whether it be for saving a file to disk or streaming data to the network. This is known as an encoding system, and the creators of BitTorrent came up with their own system, bencode. 
 
-# the protocol
+## the protocol
 
 Here's the entire description of bencode from the original BitTorrent protocol specification:
 
@@ -35,7 +37,7 @@ Bencode has four types:
 
     The keys must be strings. They also must be sorted by their raw data (for example, sorting `aAbB=_~` gives `=AB_ab~`).
 
-# examples
+## examples
 
 Here's an example. Let's say we have a `Person` type, which has a first name field, a last name field, and an age field:
 
