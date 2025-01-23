@@ -1,0 +1,8 @@
+project:
+  render:
+    - ../acknowledgements.qmd
+    - ../preface.qmd
+
+format:
+  latex:
+    template: template.tex

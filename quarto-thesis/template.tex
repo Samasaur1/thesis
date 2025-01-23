@@ -429,6 +429,10 @@ $for(include-before)$
 $include-before$
 
 $endfor$
+
+\IfFileExists{./acknowledgements.tex}{\input{acknowledgements.tex}}{}
+\IfFileExists{./preface.tex}{\input{preface.tex}}{}
+
 $toc.tex()$
 
 $if(linestretch)$

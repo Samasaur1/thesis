@@ -1,5 +1,7 @@
 project:
   type: book
+  pre-render: quarto render _prelims
+  post-render: ./_prelims/cleanup.bash
 
 book:
   title: "quarto-thesis"
