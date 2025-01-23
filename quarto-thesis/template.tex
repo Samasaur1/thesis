@@ -422,6 +422,13 @@ $before-title.tex()$
 
 $title.tex()$
 
+\division{$division$}
+\department{$department$}
+$if(thedivisionof)$\thedivisionof{$thedivisionof$}$endif$
+$if(approvedforthe)$\approvedforthe{$approvedforthe$}$endif$
+\advisor{$advisor$}
+$if(altadvisor)$\altadvisor{$altadvisor$}$endif$
+
 \begin{document}
 $before-body.tex()$
 

@@ -26,6 +26,9 @@ abbrs:
   TCP: Transmission Control Protocol
   IP: Internet Protocol
   JSON: JavaScript Object Notation
+division: Mathematics and Natural Sciences
+department: Computer Science
+advisor: Erica Blum
 
 format:
   html:
