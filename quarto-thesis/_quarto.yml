@@ -42,3 +42,8 @@ format:
       - doc-class.tex
       - biblio.tex
     cite-method: biblatex
+    include-before-body:
+      text: |
+        \renewcommand{\footrulewidth}{0.4pt}
+        \fancyfoot[LE]{\it Built off of \href{https://github.com/Samasaur1/thesis/commit/\commitRevRaw}{\tt \commitShortRev}}
+        \fancyfoot[RO]{\it Last updated on \commitDate}

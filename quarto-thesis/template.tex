@@ -429,6 +429,26 @@ $if(approvedforthe)$\approvedforthe{$approvedforthe$}$endif$
 \advisor{$advisor$}
 $if(altadvisor)$\altadvisor{$altadvisor$}$endif$
 
+$if(commitRev)$
+\newcommand{\commitRevRaw}{$commitRev$}
+$else$
+\newcommand{\commitRevRaw}{0000000000000000000000000000000000000000}
+$endif$
+\newcommand{\commitRev}{commit \commitRevRaw}
+$if(commitShortRev)$
+\newcommand{\commitShortRevRaw}{$commitShortRev$}
+$else$
+\newcommand{\commitShortRevRaw}{000000}
+$endif$
+\newcommand{\commitShortRev}{commit \commitShortRevRaw}
+$if(commitDate)$
+\newcommand{\commitDate}{$commitDate$}
+$else$
+\usepackage{datetime2}
+\newcommand{\commitDate}{\DTMnow}
+$endif$
+
+
 \begin{document}
 $before-body.tex()$
 
