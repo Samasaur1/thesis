@@ -435,6 +435,9 @@ $endfor$
 
 $toc.tex()$
 
+\IfFileExists{./abstract.tex}{\chapter*{Abstract}\input{abstract.tex}}{}
+\IfFileExists{./dedication.tex}{\chapter*{Dedication}\input{dedication.tex}}{}
+
 $if(linestretch)$
 \setstretch{$linestretch$}
 $endif$

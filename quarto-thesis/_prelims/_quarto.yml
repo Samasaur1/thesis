@@ -2,6 +2,8 @@ project:
   render:
     - ../acknowledgements.qmd
     - ../preface.qmd
+    - ../abstract.qmd
+    - ../dedication.qmd
 
 format:
   latex:
