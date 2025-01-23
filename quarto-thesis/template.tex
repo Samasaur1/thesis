@@ -432,6 +432,20 @@ $endfor$
 
 \IfFileExists{./acknowledgements.tex}{\chapter*{Acknowledgements}\input{acknowledgements.tex}}{}
 \IfFileExists{./preface.tex}{\chapter*{Preface}\input{preface.tex}}{}
+	
+% Only add a list of abbreviations if there are any abbreviations
+$if(abbrs)$
+\chapter*{List of Abbreviations}
+% longtable doesn't seem to work here through Quarto. I don't know why and if I spend any more time on this I will go insane
+\begin{table}[h]
+    \centering % You could remove this to move table to the left
+    \begin{tabular}{p{.20\textwidth} | p{.80\textwidth}}
+        $for(abbrs/pairs)$
+        \textbf{$it.key$} & $it.value$ \\
+        $endfor$
+    \end{tabular}
+\end{table}
+$endif$
 
 $toc.tex()$
 

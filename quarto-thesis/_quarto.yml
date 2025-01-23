@@ -15,6 +15,11 @@ book:
 
 bibliography: references.bib
 
+abbrs:
+  TCP: Transmission Control Protocol
+  IP: Internet Protocol
+  JSON: JavaScript Object Notation
+
 format:
   html:
     theme: cosmo
