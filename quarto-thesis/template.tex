@@ -430,8 +430,8 @@ $include-before$
 
 $endfor$
 
-\IfFileExists{./acknowledgements.tex}{\input{acknowledgements.tex}}{}
-\IfFileExists{./preface.tex}{\input{preface.tex}}{}
+\IfFileExists{./acknowledgements.tex}{\chapter*{Acknowledgements}\input{acknowledgements.tex}}{}
+\IfFileExists{./preface.tex}{\chapter*{Preface}\input{preface.tex}}{}
 
 $toc.tex()$
 
