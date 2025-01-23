@@ -17,5 +17,5 @@ format:
   html:
     theme: cosmo
   pdf:
-    documentclass: scrreprt
+    documentclass: reedthesis
     template: template.tex
