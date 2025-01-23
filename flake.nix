@@ -28,7 +28,7 @@
     in
     {
       packages = define (pkgs: {
-        thesis = pkgs.callPackage ./thesis {
+        thesis = pkgs.callPackage ./quarto-thesis {
           inherit rev;
           inherit (self) shortRev lastModified;
         };
