@@ -19,5 +19,8 @@ format:
   html:
     theme: cosmo
   pdf:
-    documentclass: reedthesis
+    documentclass: book
+    realdocumentclass: reedthesis
     template: template.tex
+    template-partials:
+      - doc-class.tex
