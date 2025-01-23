@@ -13,8 +13,14 @@ book:
     # Therefore, we put our introduction in index.qmd
     - index.qmd
     - summary.qmd
+  appendices:
+    - appendix.qmd
 
 bibliography: references.bib
+
+filters:
+  - quarto
+  - remove-appendix-part.lua
 
 abbrs:
   TCP: Transmission Control Protocol
