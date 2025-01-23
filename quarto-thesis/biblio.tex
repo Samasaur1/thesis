@@ -25,7 +25,8 @@ $if(beamer)$
   \printbibliography[heading=none]
 \end{frame}
 $else$
-\printbibliography$if(biblio-title)$[title=$biblio-title$]$endif$
+\beginbib
+\printbibliography[heading=none]
 $endif$
 
 $endif$

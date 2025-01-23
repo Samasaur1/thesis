@@ -13,7 +13,6 @@ book:
     # Therefore, we put our introduction in index.qmd
     - index.qmd
     - summary.qmd
-    - references.qmd
 
 bibliography: references.bib
 
@@ -32,3 +31,4 @@ format:
     template-partials:
       - doc-class.tex
       - biblio.tex
+    cite-method: biblatex

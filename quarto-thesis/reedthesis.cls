@@ -69,6 +69,32 @@
 		    \@afterindentfalse
 		    \secdef\@chapter\@schapter}
 		    
+
+\def\@bibhead{%
+  \vspace*{120\p@}%
+  {\parindent \z@ \raggedleft
+    \normalfont
+    \interlinepenalty\@M
+    \large \bfseries
+    B~I~B~L~I~O~G~R~A~P~H~Y \hspace{0.5cm}
+    \par\nobreak
+    \HRule
+    \par\nobreak
+    \vskip 40\p@
+  }}
+
+\newcommand{\beginbib}{\if@openright\RTcleardoublepage\else\clearpage\fi
+                    \thispagestyle{empty}%
+                    \global\@topnum\z@
+                    \@afterindentfalse
+                    \if@twocolumn
+                        \@topnewpage[\@bibhead{}]%
+                    \else
+                        \@bibhead{}%
+                        \@afterheading
+                    \fi
+                    \addcontentsline{toc}{chapter}{Bibliography}}
+
 % Stolen from book.cls PBC 5/12/05
 % Using this to actually show "Chapter 1" in TOC instead of "1"
 \def\@chapter[#1]#2{\ifnum \c@secnumdepth >\m@ne
