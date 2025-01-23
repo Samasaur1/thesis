@@ -5,8 +5,9 @@ project:
 
 book:
   title: "quarto-thesis"
-  author: "Norah Jones"
-  date: "1/22/2025"
+  author: "Sam Gauck"
+  date: "May 2025"
+  date-format: "MMMM YYYY"
   chapters:
     # All books must have an index.qmd file. See https://github.com/quarto-dev/quarto-cli/issues/2556
     # If the file is empty, it produces an empty chapter.
