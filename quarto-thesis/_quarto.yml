@@ -31,3 +31,4 @@ format:
     template: template.tex
     template-partials:
       - doc-class.tex
+      - biblio.tex
