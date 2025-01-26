@@ -434,13 +434,13 @@ $if(commitRev)$
 $else$
 \newcommand{\commitRevRaw}{0000000000000000000000000000000000000000}
 $endif$
-\newcommand{\commitRev}{commit \commitRevRaw}
+\newcommand{\commitRev}{commit {\tt\commitRevRaw}}
 $if(commitShortRev)$
 \newcommand{\commitShortRevRaw}{$commitShortRev$}
 $else$
 \newcommand{\commitShortRevRaw}{000000}
 $endif$
-\newcommand{\commitShortRev}{commit \commitShortRevRaw}
+\newcommand{\commitShortRev}{commit {\tt\commitShortRevRaw}}
 $if(commitDate)$
 \newcommand{\commitDate}{$commitDate$}
 $else$
