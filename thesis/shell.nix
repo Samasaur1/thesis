@@ -3,7 +3,7 @@
 pkgs.mkShell {
   packages = [
     pkgs.texliveFull
-    pkgs.pandoc
+    pkgs.quarto
   ];
 
   name = "sam's thesis shell";

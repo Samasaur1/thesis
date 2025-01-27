@@ -1,7 +1,0 @@
-# Introduction
-
-\lipsum
-
-\lipsum
-
-\lipsum

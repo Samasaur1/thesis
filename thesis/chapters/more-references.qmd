@@ -1,0 +1,30 @@
+# Try linking to more things {#sec-linking}
+
+```swift {#lst-swift}
+print("Hello, world")
+```
+
+| Col1 | Col2 | Col3 |
+|------|------|------|
+| A    | B    | C    |
+| E    | F    | G    |
+| A    | G    | G    |
+
+: My Caption {#tbl-letters}
+
+See @tbl-letters.
+
+And @lst-swift
+
+This is all in @sec-linking
+
+```{#lst-swift-2 .swift}
+print("Block 2")
+```
+
+```swift {#lst-swift-3 lst-cap="goodbye world"}
+print("Goodbye, world!")
+```
+
+What about [@lst-swift, @lst-swift-2, @lst-swift-3]
+What about @lst-swift, @lst-swift-2, @lst-swift-3

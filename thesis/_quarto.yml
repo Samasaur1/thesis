@@ -12,12 +12,18 @@ book:
     # All books must have an index.qmd file. See https://github.com/quarto-dev/quarto-cli/issues/2556
     # If the file is empty, it produces an empty chapter.
     # Therefore, we put our introduction in index.qmd
+    # (it's actually a symlink to chapters/intro.qmd)
     - index.qmd
-    - summary.qmd
+    - chapters/example-image.qmd
+    - chapters/list.qmd
+    - chapters/continue-referenced-list.qmd
+    - chapters/citations.qmd
+    - chapters/more-references.qmd
+    - chapters/bencode.qmd
   appendices:
-    - appendix.qmd
+    - chapters/git-revisions.qmd
 
-bibliography: references.bib
+bibliography: bibliography.bib
 
 filters:
   - quarto
@@ -47,3 +53,4 @@ format:
         \renewcommand{\footrulewidth}{0.4pt}
         \fancyfoot[LE]{\it Built off of \href{https://github.com/Samasaur1/thesis/commit/\commitRevRaw}{\commitShortRev}}
         \fancyfoot[RO]{\it Last updated on \commitDate}
+    keep-tex: true
