@@ -1,0 +1,51 @@
+project:
+  type: book
+  pre-render: quarto render _prelims
+  post-render: ./_prelims/cleanup.bash
+
+book:
+  title: "Sam's Thesis"
+  author: "Sam Gauck"
+  date: "May 2025"
+  date-format: "MMMM YYYY"
+  chapters:
+    # All books must have an index.qmd file. See https://github.com/quarto-dev/quarto-cli/issues/2556
+    # If the file is empty, it produces an empty chapter.
+    # Therefore, we put our introduction in index.qmd
+    # (it's actually a symlink to chapters/intro.qmd)
+    - index.qmd
+    - chapters/bencode.qmd
+  appendices:
+    - chapters/git-revisions.qmd
+
+bibliography: bibliography.bib
+# biblio-style: ieee # TODO: deal with in the future if it matters
+
+filters:
+  - quarto
+  - remove-appendix-part.lua
+
+abbrs:
+  TCP: Transmission Control Protocol
+  IP: Internet Protocol
+  JSON: JavaScript Object Notation
+division: Mathematics and Natural Sciences
+department: Computer Science
+advisor: Erica Blum
+
+format:
+  html:
+    theme: cosmo
+  pdf:
+    documentclass: book
+    realdocumentclass: reedthesis
+    template: template.tex
+    template-partials:
+      - doc-class.tex
+      - biblio.tex
+    cite-method: biblatex
+    include-before-body:
+      text: |
+        \renewcommand{\footrulewidth}{0.4pt}
+        \fancyfoot[LE]{\it Built off of \href{https://github.com/Samasaur1/thesis/commit/\commitRevRaw}{\commitShortRev}}
+        \fancyfoot[RO]{\it Last updated on \commitDate}

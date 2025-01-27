@@ -4,8 +4,14 @@
 nix build .#thesis
 ```
 
+(aka)
+
+```
+quarto render --to pdf
+```
+
 ## Future work
 
-- Getting something akin to <https://github.com/tomduck/pandoc-xnos> set up. Unfortunately, that filter only supports Pandoc 2 and below (even if you adjust the regex)
-- Pick a style (from <https://www.zotero.org/styles>)
+- Pick a style (from <https://www.zotero.org/styles>). I'm using biblatex, not citeproc, so that the bibliography can go in the right place, so that style repository may not apply.
 - Automatic drop caps in main matter chapters (combo of pandoc filter and latex macro)
+- Unify chapter/appendix/bibliography hrule offsets

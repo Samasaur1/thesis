@@ -14,23 +14,8 @@ let
     src = ./.;
 
     buildInputs = [
-      # (pkgs.texliveBasic.withPackages (
-      #   ps:
-      #   builtins.attrValues {
-      #     inherit (ps)
-      #       palatino
-      #       booktabs
-      #       setspace
-      #       lipsum
-      #       etoolbox
-      #       ocgx2
-      #       media9
-      #       fancyvrb
-      #       ;
-      #   }
-      # ))
+      pkgs.quarto
       pkgs.texliveFull
-      pkgs.pandoc
     ];
 
     buildPhase = ''
@@ -38,37 +23,19 @@ let
 
       echo "Calculated last commit date of flake as $DATE"
 
-      readarray -d "" FILES < <(${pkgs.lib.getExe' pkgs.findutils "find"} chapters/ -name '*.md' -print0 | ${pkgs.lib.getExe' pkgs.coreutils "sort"} -z)
-
-      echo "Detected ''${#FILES[@]} Markdown files"
-
       mkdir $out
 
       echo "Created output directory"
 
-      for f in {acknowledgements,preface,abstract,dedication}; do
-        pandoc \
-          --defaults common-options.yaml \
-          --defaults prelim-options.yaml \
-          --metadata-file metadata.yaml \
-          -M commitRev=${rev} -M commitShortRev=${shortRev} -M "commitDate=''${DATE}" \
-          "$f.md" -o "$f.tex"
-      done
+      export HOME=$(mktemp -d)
 
-      echo "Generated prelim .tex files with Pandoc"
+      echo "Overriding HOME to avoid complaints from quarto"
 
-      pandoc \
-        --defaults common-options.yaml \
-        --defaults final-options.yaml \
-        --metadata-file metadata.yaml \
-        -M commitRev=${rev} -M commitShortRev=${shortRev} -M "commitDate=''${DATE}" \
-        --template template.tex \
-        "''${FILES[@]}" -o $out/thesis.pdf
-
-      echo "Generated thesis.pdf with Pandoc"
+      quarto render --to pdf --no-cache -M "commitRev:${rev}" -M "commitShortRev:${shortRev}" -M "commitDate:''${DATE}" -o thesis.pdf --output-dir $out
     '';
   };
 in
-  pkgs.runCommandNoCC "thesis.pdf" { } ''
-    ln -s ${thesis}/thesis.pdf $out
-  ''
+  # pkgs.runCommandNoCC "thesis.pdf" { } ''
+  #   ln -s ${thesis}/thesis.pdf $out
+  # ''
+  thesis
