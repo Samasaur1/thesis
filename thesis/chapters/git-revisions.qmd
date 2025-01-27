@@ -1,10 +1,16 @@
 # Git revisions
 
-This document was built off of \texttt{\commitRev} (\commitDate).
+This document was last updated on \commitDate.  
+This corresponds to \commitRev.
 
 The revisions of the code I wrote are as follows:
 
 BencodeKit
-:   \texttt{\commitShortRev}
+
+:   000000
+
+TorrentFileKit
+
+:   000000
 
 (etc.)

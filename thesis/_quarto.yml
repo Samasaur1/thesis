@@ -4,7 +4,7 @@ project:
   post-render: ./_prelims/cleanup.bash
 
 book:
-  title: "quarto-thesis"
+  title: "Sam's Thesis"
   author: "Sam Gauck"
   date: "May 2025"
   date-format: "MMMM YYYY"
@@ -14,11 +14,6 @@ book:
     # Therefore, we put our introduction in index.qmd
     # (it's actually a symlink to chapters/intro.qmd)
     - index.qmd
-    - chapters/example-image.qmd
-    - chapters/list.qmd
-    - chapters/continue-referenced-list.qmd
-    - chapters/citations.qmd
-    - chapters/more-references.qmd
     - chapters/bencode.qmd
   appendices:
     - chapters/git-revisions.qmd
@@ -54,4 +49,3 @@ format:
         \renewcommand{\footrulewidth}{0.4pt}
         \fancyfoot[LE]{\it Built off of \href{https://github.com/Samasaur1/thesis/commit/\commitRevRaw}{\commitShortRev}}
         \fancyfoot[RO]{\it Last updated on \commitDate}
-    keep-tex: true
