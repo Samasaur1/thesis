@@ -18,7 +18,17 @@ let
       pkgs.texliveFull
     ];
 
+    patchPhase = ''
+      runHook prePatch
+
+      patchShebangs _prelims/cleanup.bash
+
+      runHook postPatch
+    '';
+
     buildPhase = ''
+      runHook preBuild
+
       DATE="$(TZ='America/Los_Angeles' ${pkgs.lib.getExe' pkgs.coreutils "date"} -d '@${toString lastModified}' +'%B %-d, %Y at %-I:%M%P (%z)')"
 
       echo "Calculated last commit date of flake as $DATE"
@@ -32,6 +42,8 @@ let
       echo "Overriding HOME to avoid complaints from quarto"
 
       quarto render --to pdf --no-cache -M "commitRev:${rev}" -M "commitShortRev:${shortRev}" -M "commitDate:''${DATE}" -o thesis.pdf --output-dir $out
+
+      runHook postBuild
     '';
   };
 in
