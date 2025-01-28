@@ -16,6 +16,7 @@ let
     buildInputs = [
       pkgs.quarto
       pkgs.texliveFull
+      pkgs.tzdata
     ];
 
     patchPhase = ''
