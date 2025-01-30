@@ -26,6 +26,6 @@ Crucially, at this point Alice and Bob are entirely equal in the eyes of BitTorr
 
 There are many implementations of BitTorrent out there, just as there are many explanations of how BitTorrent works. However, the existing implementations of BitTorrent are designed primarily for use rather than explanatory purposes, and the existing explanations (by and large) assume a fair bit of background knowledge and/or gloss over parts of the protocol.
 
-I'll cite @gauck just to ensure the bibliography has an entry.
+I'll cite @gauck_implementing_2022 just to ensure the bibliography has an entry.
 
 \todo{add diagrams}
