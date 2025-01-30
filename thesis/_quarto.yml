@@ -29,8 +29,13 @@ filters:
 
 abbrs:
   TCP: Transmission Control Protocol
+  UDP: User Datagram Protocol
   IP: Internet Protocol
   JSON: JavaScript Object Notation
+  ASCII: American Standard Code for Information Interchange
+  UTF-8: Unicode Transformation Format 8
+  URL: Uniform Resource Locator
+  SHA1: Secure Hashing Algorithm 1
 division: Mathematics and Natural Sciences
 department: Computer Science
 advisor: Erica Blum
