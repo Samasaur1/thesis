@@ -1,0 +1,76 @@
+# Trackers {#sec-trackers}
+
+Once the torrent file has been parsed, the actual torrent download begins by contacting one or more trackers. These trackers are the only centralized part of the protocol[^magnet links], and keeps track of peers so that they can find each others. 
+
+% FIRST SENTENCE OF CHAPTER SHOULD CONNECT TO PREVIOUS CHAPTER
+
+The actual torrent download begins by contacting 
+
+***
+
+Once the torrent file has been parsed, the program makes an HTTP GET request to one or more trackers, as given in the `announce` field in the torrent file. The tracker is the only centralized part of the protocol^[magnet links], and when clients connect to it, it (in addition to keeping metrics) gives them a list of peers in the swarm. However, trackers can serve multiple different torrents, so we must identify the torrent we are downloading. We do this by passing the `infoHash` parameter, described earlier. To get the info hash, we take the SHA1 hash of the bencoded form of the `info` dict in the torrent file. Since we are making HTTP GET requests to the tracker, we must also URL-encode the info hash -- we **do not** simply turn it into a hex string, but URL-encode the raw data^[The official spec says that this value "will almost certainly have to be escaped" and gives no more details --- aggravating].
+
+## Request parameters
+
+Tracker get requests must have the following parameters:
+
+`info_hash`
+:   As mentioned above, this is the URL-encoded SHA1 hash of the bencoded value of the `info` key of the torrent file.
+
+`peer_id`
+:   A URL-encoded 20 byte string that is a unique ID for the client. There are various styles used in BitTorrent clients. % put summary definition in first sentence
+
+`port`
+:   The port that the client is listening on. Firewalls may make this value redundant. % Expand
+
+`uploaded`
+:   The total bytes uploaded.
+
+`downloaded`
+:   The total bytes downloaded.
+
+`left`
+:   The total bytes left to download.
+
+There is one other key, called `event`, which is not always present. Specifically, it's not present on the intermittent requests to the tracker, but is required for any of the "special" events:
+
+- When making the initial request to the tracker, the value of this key should be `started`
+- When shutting down gracefully, the value of this key should be `stopped`
+- When notifying the tracker that the download has completed, but that you'll continue to seed, the value of this key should be `completed`
+
+## Tracker response
+
+The tracker will respond with a bencoded dictionary with the following keys:
+
+`failure reason`
+:   A human-readable error message saying why the request failed (string). If present, no other keys may be present.
+
+`interval`
+:   The time in seconds the client should wait between intermittent tracker requests (integer).
+
+`tracker id`
+:   A string that identifies this tracker (optional). If present, update the stored tracker ID variable, and all future tracker requests should include it as a parameter. If not present, leave the stored tracker ID alone.
+
+`complete`
+:   The number of peers currently in the swarm with the entire file (integer).
+
+`incomplete`
+:   The number of peers currently in the swarm who do not have the entire file (integer).
+
+`peers`
+:   This comes in two versions: a dictionary model and a more compact binary model.
+
+    When using the dictionary model, this is a list of dictionaries, each with the following keys:
+
+    `peer id`
+    :   The peer's peer ID (string/raw data).
+
+    `ip`
+    :   The peer's IP address (string). Technically this can be an IPv4 address, an IPv6 address, or a DNS name, but they are all strings.
+
+    `port`
+    :   The peer's port number (integer).
+
+
+    When using the binary model,
+    \todo{explain binary model here}
