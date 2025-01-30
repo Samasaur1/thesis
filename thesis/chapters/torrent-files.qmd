@@ -1,0 +1,86 @@
+# Torrent Files {#sec-torrent-files}
+
+The BitTorrent process begins with the *metainfo file* (also known as the *torrent file* due to the customary `.torrent` file extension). The metainfo file is a small file that must be directly downloaded before starting the BitTorrent process and contains the necessary information to begin the BitTorrent process. There are significant differences between v1 and v2 metainfo files, but at a general level a metainfo file is a dictionary serialized via Bencode (described in detail in @sec-bencode).
+
+## Common characteristics
+
+### Top-level keys
+
+All metainfo files (v1 and v2) have the following keys:
+
+`announce`
+:   The URL of the tracker. Note that due to @bep0012 the value of this key is usually ignored, though it must still be present.
+
+`info`
+:   The info dictionary, which in turn contains its own sub-keys. The distinction between keys at the top-level of the metainfo file and keys in the info dictionary is important because the serialized form of the info dictionary is used as an identifier for the torrent as a whole (see @sec-info-hash for more details). This allows for changing out the tracker URL without invalidating the entire torrent.
+
+### The info dictionary
+
+The info dictionary must have the following keys in both v1 and v2 metainfo files:
+
+`name`
+:   The display name of the torrent, which is usually used as the suggestion for where to save the downloaded file(s). Although it must be present, it is "purely advisory" [@bep0003; @bep0052] and could in theory be ignored by the torrent client.
+
+`piece length`
+:   The size, in bytes, of each piece of the torrent. Unless the total length of the torrent is a perfect multiple of this value, the final piece will be shorter.
+
+
+## Keys only present in v1 metainfo files
+
+### Top-level keys
+
+All keys that must exist at the top level of a v1 metainfo file must also exist in a v1 metainfo file.
+
+### Keys in the info dictionary
+
+`pieces`
+:   The (SHA1) hashes of the pieces of the torrent, concatenated in order. Because each SHA1 hash is 20 bytes long, the length of this data must be 20 times the number of pieces bytes long.
+
+`length` or `files`, but not both
+:   One and only one of these keys must be present (if neither or both keys are present, the metainfo file is invalid). Which key is present indicates whether the torrent described by this metainfo file will download a single file or a directory of files: if the `length` key is present, the torrent will download a single file, and the value of the key is the length (in bytes) of that file. If the `files` key is present, the torrent will download a directory of files, and the value of the key is as follows:
+
+    The value associated with the `files` key is a list of dictionaries. Each dictionary in the list represents one file downloaded by the torrent, and contains two keys: `length`, which is the length of the given file (in bytes); and `path`, which is a list of strings that represent the path to the given file relative to the directory chosen for the torrent to be downloaded to.
+
+    For example, if the `files` key has the value  
+    `ld6:lengthi1e4:pathl9:first.txteed6:lengthi5e4:pathl9:my_folder10:second.txteee`:
+
+    ```bencode
+    l
+      d
+        6:length
+          i1e
+        4:path
+          l
+            9:first.txt
+          e
+      e
+      d
+        6:length
+          i5e
+        4:path
+          l
+            9:my_folder
+            10:second.txt
+          e
+      e
+    e
+    ```
+
+    then it is describing two files. The first is 1 byte long and will be saved to `first.txt` inside the directory that the user chooses to save the torrent to. The second is 5 bytes long and will be saved to `second.txt` in a directory named `my_folder` inside the directory that the user chooses to save the torrent to.
+
+    Be aware that the order of the files given under the `files` key does matter. This is because, for the purposes of splitting a torrent into pieces, BitTorrent pretends that a multi-file torrents is really a extremely long single-file torrent, and it does so by concatenating all the files listed under the `files` key *in the order they are listed*. This is the only time that the order of these files is relevant, though it must be kept in mind in various parts of the implementation.
+
+## Keys only present in v2 metainfo files
+
+### Top-level keys
+
+`piece layers`
+:   def
+
+### Keys in the info dictionary
+
+`meta version`
+:   The version of the BitTorrent protocol that this metainfo file was designed to use.
+
+`file tree`
+:   def
