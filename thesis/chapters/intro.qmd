@@ -1,5 +1,31 @@
 # Introduction
 
-This file must always exist, even though I haven't written an introduction yet.
+My thesis aims to provide an explanation of BitTorrent that assumes as little prior knowledge as possible, along with an implementation of BitTorrent that allows you to visualize the protocol at work.
+
+## What is BitTorrent?
+
+BitTorrent is a protocol used to download file(s). It offers a couple advantages over traditional (HTTP-based) file downloading. The largest advantage is its *resilience*: if person A starts sharing a file and then their computer goes offline, all downloaders can still receive the entire file so long as every piece of the file exists somewhere in the network, even if no individual person has the entire file. Another advantage is reduced load on the person who originally shared the file: as the file is disseminated throughout the network, new downloaders will retrieve some pieces of the file from those who have already downloaded it and not from the person who originally shared the file.
+
+## How does BitTorrent work?
+
+Suppose Alice has a file that she would like to share. She begins by generating a *metainfo file* (described in detail in @sec-torrent-files), which describes the file she'd like to share. Then she opens the metainfo file using her BitTorrent client[^client], shares the metainfo file over a side channel, and waits for a downloader to connect.
+
+\todo{name the file?}
+
+[^client]: A "BitTorrent client" is a program that implements the BitTorrent protocol, allowing its users to download files. I use the terms "BitTorrent client" and "implementation of BitTorrent" interchangeably.
+
+If Bob then wants to download Alice's file, he begins by acquiring the metainfo file Alice generated and opening it in his BitTorrent client. Bob's client parses the metainfo file and connects to the *tracker* listed in the file. The tracker (described in detail in @sec-trackers) gives Bob's client a list of *peers*, other people in the network who are uploading and/or downloading the same file, and their IP addresses. Bob's client then connects to some of these peers (for the purposes of this example, his client connects to Alice) and begins the *peer wire protocol* (see @sec-peer-wire-protocol) with each of them. The peer wire protocol defines how Bob's client can request and receive pieces of the file he wants from Alice, which it does automatically. As Bob's client receives pieces of the file, it verifies that they are correct (uncorrupted and untampered-with) against information stored in the metainfo file[^verification], and once it has all the pieces of the file, it checks that the file as a whole is correct.
+
+[^verification]: The method for performing these checks is described in more detail in @sec-torrent-files, but in short we check the hash of each piece against its hash stored in the metainfo file. This allows us to verify each piece of the file without needing to store each piece in the metainfo file in its entirety --- in which case there'd be no need to use BitTorrent, since we'd have the whole file already!
+
+Bob has now successfully downloaded a file using BitTorrent!
+
+Crucially, at this point Alice and Bob are entirely equal in the eyes of BitTorrent. It doesn't matter that Alice was the one to originally share the file, and if Alice turned off her computer and Charlie wanted to download the file, he could get the entire file from Bob so long as Bob's computer remains online.
+
+## What did I produce?
+
+There are many implementations of BitTorrent out there, just as there are many explanations of how BitTorrent works. However, the existing implementations of BitTorrent are designed primarily for use rather than explanatory purposes, and the existing explanations (by and large) assume a fair bit of background knowledge and/or gloss over parts of the protocol.
 
 I'll cite @gauck just to ensure the bibliography has an entry.
+
+\todo{add diagrams}
