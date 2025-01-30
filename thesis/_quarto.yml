@@ -16,6 +16,7 @@ book:
     - index.qmd
     - chapters/bencode.qmd
     - chapters/torrent-files.qmd
+    - chapters/peer-wire-protocol.qmd
     - chapters/extensions.qmd
   appendices:
     - chapters/networking-primer.qmd
