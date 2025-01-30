@@ -16,6 +16,7 @@ book:
     - index.qmd
     - chapters/bencode.qmd
   appendices:
+    - chapters/networking-primer.qmd
     - chapters/git-revisions.qmd
 
 bibliography: bibliography.bib

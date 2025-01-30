@@ -1,0 +1,19 @@
+# Computer Networking Primer {#sec-computer-networking-primer}
+
+As interesting as computers are by themselves, they are infinitely more so when they talk to each other --- especially in the context of my thesis, which would be completely uninteresting without networking.
+
+This appendix gives a basic introduction to computer networking. It is not intended to be a comprehensive reference nor even entirely accurate; its purpose is solely to provide enough background that the rest of my thesis is understandable.
+
+## OSI Model/Internet Protocol Suite
+
+### IP
+
+### TCP
+
+### UDP
+
+### HTTP
+
+## Anatomy of a web request
+
+## Anatomy of a ~~web~~ BitTorrent request
