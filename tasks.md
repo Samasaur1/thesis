@@ -20,3 +20,16 @@
 - looking towards architecture/multiple torrents
 - start talking to trackers
 - writeup of torrentfiles
+
+2025-03-14 (bundled with 03-07 bc erica will be at conference):
+- working bittorrent client should be "done" (enough for thesis purposes)
+- rough draft of section/chapter in by 3/13
+- read peets section/chapter before group meeting
+- (in group meeting) exercise H
+
+2025-03-21
+- outgoing connections
+- requesting and stitching chunks (can steal from last attempt)
+- start from metainfo file
+- multifile torrent support (cuttable)
+- gui? stretch goal?
