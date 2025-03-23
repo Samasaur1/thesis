@@ -20,6 +20,7 @@ quarto render --to pdf
 - list of terms that aren't abbreviations (e.g. "dictionary" to mean list of key-value pairs)
 - how to cite BEPs (ideally they show up as "BEP 0003" in the document instead of the author's last name)
 - make all libraries (BencodeKit, TorrentFileKit, etc.) Nix flakes that are inputs to this flake, so that I can grab their last modification info and inject it into the document
+- switch back to using pandoc's citeproc and <https://pandoc.org/MANUAL.html#placement-of-the-bibliography> to place the bibliography in the right location
 
 ## references
 
