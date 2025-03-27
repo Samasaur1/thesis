@@ -2,6 +2,8 @@
 
 Once the torrent file has been parsed, the actual torrent download begins by contacting one or more trackers. These trackers are the only centralized part of the protocol[^magnet links], and keeps track of peers so that they can find each others. 
 
+\todo{@bep0012 still wants you to only contact one tracker. check if there are other extensions that want you to contact multiple trackers at once, and otherwise remove this mention of "or more"}
+
 % FIRST SENTENCE OF CHAPTER SHOULD CONNECT TO PREVIOUS CHAPTER
 
 The actual torrent download begins by contacting 
