@@ -103,6 +103,30 @@ e
 
 ## parsing
 
+Note: This section, and the rest of this chapter, are not necessary to understand either bencode or BitTorrent as a whole. In it, I go in-depth into how I implemented parsing bencode, because I find it fascinating.
+
+\todo{check the wording of this with erica}
+
+### Single-pass parsing
+
+Bencode was pretty clearly designed to be easy to parse in a single pass, in which it is successful.
+
+i did this in @gauck_implementing_2022.
+
+very easy to get dictionaries
+
+### Parsing into typed objects
+
+we want to parse into typed objects instead of dicts.
+we don't want to manually do the conversion from dicts to objects.
+swift has support for parsing into typed objects.
+
+### my actual approach
+
+***
+
+\todo{this can probably just be removed?}
+
 Here's the entire description of bencode from the original BitTorrent protocol specification:
 
 > bencoding
