@@ -1,5 +1,101 @@
-# BitTorrent Extensions
+# BitTorrent Extensions {#sec-extensions}
 
-How extensions work.
+## Peer wire protocol extensions
 
-## Magnet links
+Recall from @sec-peer-wire-protocol (specifically @sec-peer-wire-protocol-handshake) that once two peers connect, the first thing that they do is perform a *handshake*. The handshake that I used looks like this:
+
+```hexdump
+00000000  13 42 69 74 54 6f 72 72  65 6e 74 20 50 72 6f 74  |.BitTorrent Prot|
+00000010  6f 63 6f 6c 00 00 00 00  00 00 00 00 31 31 31 31  |ocol........1111|
+00000020  31 31 31 31 31 31 31 31  31 31 31 31 31 31 31 31  |1111111111111111|
+00000030  32 32 32 32 32 32 32 32  32 32 32 32 32 32 32 32  |2222222222222222|
+00000040  32 32 32 32                                       |2222|
+00000044
+```
+
+where the info hash of the torrent in question is `11111111111111111111` (aka `0x3131313131313131313131313131313131313131`) and our peer ID is `22222222222222222222` (aka `0x3232323232323232323232323232323232323232`).
+
+\todo{use our real info hash in example?}
+
+The relevant part of this handshake is the eight bytes after the string `BitTorrent Protocol` that begins the handshake. These "reserved bytes" [@bep0003] are for extending the protocol. To understand how this works, let's zoom in on those 8 bytes:
+
+```bitfield
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+```
+
+In this representation, each line is one byte. As a byte is made up of 8 bits, which can either be 0 or 1 (false or true, off or on, etc.), this visualization shows the 8 bytes in the most detail possible.
+
+\todo{"most detail" is not the right wording. most granularity? most precision?}
+
+To indicate that a BitTorrent client supports a given extension, the client sets the corresponding bit to 1.
+
+\todo{come up with example or reference real extension}
+
+which would give us the following set of 8 bytes:
+
+```bitfield
+00000001
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+```
+
+and if we return to our original visualization of the handshake:
+
+```hexdump
+00000000  13 42 69 74 54 6f 72 72  65 6e 74 20 50 72 6f 74  |.BitTorrent Prot|
+00000010  6f 63 6f 6c 01 00 00 00  00 00 00 00 31 31 31 31  |ocol........1111|
+00000020  31 31 31 31 31 31 31 31  31 31 31 31 31 31 31 31  |1111111111111111|
+00000030  32 32 32 32 32 32 32 32  32 32 32 32 32 32 32 32  |2222222222222222|
+00000040  32 32 32 32                                       |2222|
+00000044
+```
+
+\todo{color or highlight changed byte?}
+
+Whenever the client connects to any peers, it would give this handshake instead, and if the peer it is connecting to has the same bit set in its handshake, then the clients can use whatever functionality this extension provides during their connection.
+
+What's especially handy about this method of specifying extensions is that clients (such as mine) that don't support any extensions can simply *not read* the 8 extension bytes. In fact, my implementation literally skips over them and doesn't ever check their contents. And so long as I sent 8 zero bytes in my handshake, everything works nicely.
+
+### Two minor logistical challenges
+
+Inherent to how extensions are specified, each extension must use a different bit to indicate that it is supported. Once an extension is published and widely supported, this is largely not a problem. However, it could be a problem during extension development.
+
+\todo{also note how @bep0003 says to coordinate with Bram Cohen}
+
+There are also only 64 possible extensions, simply because 8 bytes is only 64 bits.
+
+### Fast extension
+
+this is the only extension i remember by name and i'm writing this on a plane with no internet
+
+### Other extensions
+
+## Metainfo file extensions
+
+Other extensions don't affect the peer wire protocol and thus don't need to modify the handshake.
+
+### Multitracker Metadata Extension
+
+\todo{hook,justification,explanation,etc.}
+
+This extension tells the client to ignore the `announce` key in the metainfo file and read a new `announce-list` key instead. This new key holds a list of lists of tracker URLs that will be used in place of the tracker URL in the `announce` key.
+
+\todo{explain the tiers of trackers}
+
+## Other extensions
+
+### Magnet links
+
+i don't remember which kind this is
