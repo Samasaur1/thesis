@@ -2,7 +2,7 @@
 
 At various points in the BitTorrent protocol, we need to translate conceptually structured information to binary data, whether it be for saving a file to disk or streaming data to the network. This is known as serialization, and the creators of BitTorrent came up with their own system, bencode. 
 
-## the protocol
+## the protocol {#sec-bencode-the-protocol}
 
 Bencode supports serializing and deserializing four types:
 
@@ -16,7 +16,9 @@ Bencode supports serializing and deserializing four types:
 
     This type works for non-ASCII strings as well. We would encode `ü` as `2:ü`. Note that the length of this string is still 2, because the length is measured in bytes, not the more nebulous "characters", and `ü` in UTF-8 is represented using two bytes.
 
-    VARIABLE LENGTH ENCODING
+    However, in reality it's not that simple. While you can encode `ü` in two bytes, you can also use the visually identical `ü` which is represented using three bytes.
+
+    \todo{I don't really want or need to talk about variable length encoding. The important part to cover here is that we take the number of bytes instead of the number of characters. Do I even need to mention that you can use the Unicode character or the combining dieresis?}
 
     This is also the type used for data that is not a valid string in any encoding scheme, such as `0x00 0x00 0x01 0x00 0x00`. This would be encoded as `0x35 0x3A 0x00 0x00 0x01 0x00 0x00` (`0x35` is the byte for `5` and `0x3A` is the byte for `:`).
 
@@ -107,21 +109,314 @@ Note: This section, and the rest of this chapter, are not necessary to understan
 
 \todo{check the wording of this with erica}
 
-### Single-pass parsing
+### Single-pass parsing {#sec-bencode-single-pass-parsing}
 
-Bencode was pretty clearly designed to be easy to parse in a single pass, in which it is successful.
+Bencode was pretty clearly designed to be easy to parse in a single pass, in which it is successful. @gauck_implementing_2022 takes this approach, which boils down to:
 
-i did this in @gauck_implementing_2022.
+1. Implement a `parse` function, that peeks (reads without advancing the index) at the current byte and dispatches to the correct one of `parseInt`, `parseStringOrData`, `parseList`, or `parseDictionary`.
+2. Implement `parseInt`, which reads an ASCII `"i"`, reads some number of ASCII digits, reads an ASCII `"e"`, converts the digits to an integer, and returns that.
+3. Implement `parseStringOrData`, which reads some number of ASCII digits, reads an ASCII `":"`, converts the digits to an integer, and reads that many bytes. It then attempts to convert those bytes into a string, returning that string if successful or the raw bytes if not.
+4. Implement `parseArray`, which starts by reading an ASCII `"l"`. Then, until the current byte is an ASCII `"e"`, it repeatedly calls `parse`, appending each result to a list. Once the current byte is an ASCII `"e"`, it reads that byte, and then returns the list.
+5. Implement `parseDictionary`, which starts by reading an ASCII `"d"`. Then, until the current byte is an ASCII `"e"`, it repeatedly calls `parseDataOrString` and then `parse`, making the former result a key in a dictionary with the latter result as its value. Once the current byte is an ASCII `"e"`, it reads that byte, and then returns the dictionary.
 
-very easy to get dictionaries
+When the process is done, an end-user has one of: integer, string, data, list of anything, or dictionary of string to anything.[^anybencodable]
+
+[^anybencodable]: Although we know that this isn't really anything and is instead any bencodable type, the compiler's type system does not know that. \todo{probably could have created a `Bencodable` protocol but the usefulness is debatable}
 
 ### Parsing into typed objects
 
-we want to parse into typed objects instead of dicts.
-we don't want to manually do the conversion from dicts to objects.
-swift has support for parsing into typed objects.
+However, we don't really want to parse into dictionaries. This is because we know at every stage what the structure of our data should be, and we want to parse directly into an object of the correct type. This has a number of advantages:
+
+- **Centralization of all parsing and validation logic in one place.** Rather than passing around a dictionary and accessing elements from it via string keys, we can access properties on an object. This avoids having to check whether the key exists in the dictionary, and then having to check whether the value is of the right type, all while hoping that the key name isn't misspelled. It's the difference between (if we use the `Person` type defined above):
+
+    ```swift
+    let dict = parseDict()
+    
+    guard let firstName = dict["firstName"] else {
+        fatalError("Missing first name!")
+    }
+    guard let firstName = firstName as? String else {
+        fatalError("first name was incorrect type!")
+    }
+    guard let lastName = dict["lastName"] else {
+        fatalError("Missing last name!")
+    }
+    guard let lastName = lastName as? String else {
+        fatalError("last name was incorrect type!")
+    }
+    guard let age = dict["age"] else {
+        fatalError("Missing age!")
+    }
+    guard let age = age as? Int else {
+        fatalError("age was incorrect type!")
+    }
+    print("\(firstName) \(lastName) is \(age) years old")
+    ```
+
+    and
+
+    ```swift
+    let obj = parseObject()
+
+    print("\(obj.firstName) \(obj.lastName) is \(age) years old")
+    ```
+- *are* there other advantages or am i making this up? \todo{come back to this}
+
+We could do a single parsing pass to end up with a dictionary and then manually convert to a typed object. While this is an improvement, it still has its downsides:
+
+- Requires a fair amount of boilerplate code that must still be hand-written
+- Still vulnerable to misspellings
+- Must be done separately for every single type
+
+Swift actually has built-in support for parsing into typed objects via the `Codable` protocol.[^serializable] `Codable` is in fact a composition of two protocols, `Encodable` and `Decodable`. A type that conforms to `Encodable` can be serialized to data using some serialization format, while a type that conforms to `Decodable` can be constructed from data using some serialization format; conforming to `Codable` conforms to both `Encodable` and `Decodable`. Swift comes with implementations of two serialization formats, JSON and property lists.
+
+[^serializable]: This is comparable to Rust's `Serializable` trait
+
+To use them, we'd do `JSONEncoder().encode(obj)` and get JSON data, or `PropertyListEncoder().encode(obj)` and get plist data. This works so long as `obj` is *any* type that conforms to `Encodable`. Likewise, so long as `MyType` conforms to `Decodable`, we can do `JSONDecoder().decode(MyType.self, from: data)` and get an instance of `MyType` when `data` holds JSON, or `PropertyListDecoder().decode(MyType.self, from: data)` and get an instance of `MyType` when `data` holds plist data. Third-party implementations of encoders and decoders usually follow this same pattern.
+
+There are two incredibly powerful features of how Swift's Codable system works:
+
+- In the vast majority of cases, the compiler can synthesize `Codable` conformance for you.[^synthesizingconformance] This works automatically so long as all properties of the type are also `Codable`.[^recursiveconformance]
+- In the few cases where the compiler cannot synthesize conformance for you, the requirements to implement conformance are abstracted away from any details of the actual serialization format used.
+
+[^synthesizingconformance]: Synthesizing conformance means that the compiler generates code to conform to a given protocol (Java: implement an interface; Rust: implement a trait).
+[^recursiveconformance]: If you are only attempting to make a type conform to `Decodable`, then the properties need only conform to `Decodable` for synthesis to occur; likewise, if you are only attempting to conform to `Encodable`, the properties need only conform to `Encodable` and do not also need to be `Decodable`.
+
+Many types in the standard library already conform to `Codable`, such as `Int`, `String`, and `Bool`. Additionally, arrays and dictionaries conditionally conform[^conditionalconformance] to `Codable` when their contents conform to `Codable` (or `Encodable` when their contents only conform to `Encodable` and not `Decodable`, or vice versa for `Decodable` and not `Encodable`).
+
+[^conditionalconformance]: Conditional conformance allows a generic type to conform to a protocol if and only if its type parameter conforms to the same protocol. For example, `Array` does not conform to `Equatable`, so if I have two variables of type `Array<MyCustomClass>` I cannot check if they are equal. However, if the `Element` type parameter of the array (the type of object it holds) conforms to `Equatable`, then the array as a whole conforms to `Equatable` as well. This lets us check if two variables of type `Array<Int>` are equal, because `Int` conforms to `Equatable` and thus `Array<Int>` does as well.
 
 ### my actual approach
+
+not sure where to put this but I think it is handy:
+
+> There are four "levels" of API complexity in Swift's Codable system:
+> 
+> 1. Top level encoding/decoding: `JSONEncoder().encode(obj)`
+> 2. Conforming to `Codable` (synthesized):
+> 
+>     ```swift
+>     struct ExampleType: Codable {
+>         let key: String
+>         let other: [Int]
+>     }
+>     ```
+> 
+> 3. Conforming to `Codable` (manual):
+> 
+>     ```swift
+>     struct ExampleType: Codable {
+>         let key: String
+>         let other: [Int]
+> 
+>         enum CodingKeys: String, CodingKey {
+>             case key, other
+>         }
+> 
+>         func encode(to encoder: any Encoder) throws {
+>             var container = encoder.container(keyedBy: CodingKeys.self)
+>             try container.encode(self.key, forKey: .key)
+>     
+>             // Because [Int] conforms to Encodable, the following line works
+>             // try container.encode(self.other, forKey: .other)
+>     
+>             // For explanatory purposes, this is how you would do so manually
+>             var nestedContainer = container.nestedUnkeyedContainer(forKey: .other)
+>             for el in other {
+>                 try nestedContainer.encode(el)
+>             }
+>         }
+>     
+>         init(from decoder: any Decoder) throws {
+>             let container = try decoder.container(keyedBy: CodingKeys.self)
+>             self.key = try container.decode(String.self, forKey: .key)
+>     
+>             // Because [Int] conforms to Decodable, the following line works
+>             // self.other = try container.decode([Int].self, forKey: .other)
+>     
+>             // For explanatory purposes, this is how you would do so manually
+>             var tempArray = [Int]()
+>             var nestedContainer = try container.nestedUnkeyedContainer(forKey: .other)
+>             while let el = try nestedContainer.decodeIfPresent(Int.self) {
+>                 tempArray.append(el)
+>             }
+>             self.other = tempArray
+>         }
+>     }
+>     ```
+> 
+> 4. Implementing a serialization system
+
+Although the usual API is pretty simple, implementing a serialization dives into the complex parts of the system.
+
+Encoders and decoders work on "containers," which can either be a `SingleValueContainer`, an `UnkeyedContainer`, or a `KeyedContainer` (think value, list of values, dictionary of values). For example, `ExampleType` would be made up of the following containers:
+
+```
+ExampleType:
+  KeyedContainer
+    key:
+      SingleValueContainer
+    other:
+      UnkeyedContainer
+        SingleValueContainer, SingleValueContainer, SingleValueContainer, ...
+```
+
+If we were encoding the following object:
+
+```json
+{
+  "key": "value",
+  "other": [5, 6, 7, 8]
+}
+```
+the encoder would create a `KeyedContainer`, then create a `SingleValueContainer` for the key `"key"` and encode `"value"` into that container, then create an `UnkeyedContainer` for the key `"other"`, and then for each integer in the list create a `SingleValueContainer` and encode the integer into that container.
+
+To decode into an object of this type, the decoder simply runs the process "in reverse": create a `KeyedContainer`, decode a `String` for the key `"key"` (which transparently creates and decodes from a `SingleValueContainer`), create an `UnkeyedContainer`, and then decode as many integers as that container contains (each one transparently decoded through a `SingleValueContainer`).
+
+This does a great job abstracting over the actual binary formats, letting each type define its encoding and decoding in terms of these three container types without worrying about any specific serialization format or having to convert from data.
+However, that complexity needs to go somewhere, and it falls on the implementer of the encoder and decoder. \todo{rephrase? join better with following paragraph?}
+
+Encoding is actually pretty easy. Here's how we handle the three types of containers:
+
+`SingleValueContainer`
+:   This is pretty simple. We know it must contain a single value and not a list or dictionary. Since bencode supports a limited number of types, this means we're encoding an integer, a string, or some binary data (a "byte string"). We simply encode the given object according to the rules laid out in @sec-bencode-the-protocol. Attempting to encode a type not supported by bencode is an error on the part of the API consumer, so we don't even need to gracefully throw an error; we can just crash.
+
+`UnkeyedContainer`
+:   Although this is more complicated, it's actually not too bad. The container can contain any kind of container, but the nice thing is that we don't actually care: we can just ask each container for the data it produces after encoding and use that. That makes the entire implementation: encode an ASCII `"l"`, then append the data for each nested container in order, then encode an ASCII `"e"`.
+
+`KeyedContainer`
+:   This is again more complex but still okay. While the values can be any kind of container (like in `UnkeyedContainer`s), the keys must be strings. Also recall from @sec-bencode-the-protocol that the key-value pairs must be sorted by the keys. In full: encode an ASCII `"d"`, then for each key-value pair in sorted order, create a `SingleValueContainer`, encode the key into it, and append the data, then append the data for the value container, then encode an ASCII `"e"`.
+\todo{pseudocode? this sentence sucks}
+
+Decoding is much more complicated, because we aren't just producing data. Instead we are essentially passing around a big chunk of data and maintaining a bunch of indices into it, because when some type asks to decode an `UnkeyedContainer`, for example, your decoder needs to know the slice of data that container refers to. This means reading in sequence (essentially doing all the necessary work), and then when you're done parsing and finally know where the container ends, you give it back as a sub-chunk of data (essentially saying "here's the container you wanted, but I don't know what's in it") even though you just parsed the whole thing. Going through the three container types again:
+
+`SingleValueContainer`
+:   Fortunately, this is simple. It simply takes in some data and parses exactly one value before stopping. We again know that the only allowed values in this situation are integers, strings, or binary data, so we check for the allowed first bytes of those three types: an ASCII `"i"` for integers, or an ASCII digit for strings or binary data. If the first byte is not one of these, then we throw a decoding error; otherwise, we parse the matching type according to the rules laid out in @sec-bencode-the-protocol and return it when done.
+
+`UnkeyedContainer`
+:   While this is annoyingly subject to the inefficiency of taking something that should be lazily evaluated and evaluating the entire thing solely to determine the end index, it is otherwise not too bad. Your decoder starts by reading an ASCII `"l"` (throwing an error if any other byte is found). Then, until the next byte is an ASCII `"e"`, keep parsing subcontainers. Finally, read the closing ASCII `"e"`. Then take the entire range of data that you went over (from the starting `"l"` to the closing `"e"`, inclusive) and make the container out of that.
+
+    This is great in theory, but that "parse subcontainers" step belies a lot of complexity. Since we're only parsing the subcontainers so that we know where our unkeyed container ends, we can take some shortcuts. Specifically, this makes strings and data pretty simple: you read as long as the current byte is an ASCII digit, concatenate them all, convert the resulting string to an integer (the length of the actual encoded string/data), and advance the index that many bytes (plus one for the `":"` separator between the length and the actual string/data). Integers are also not too hard: read the starting `"i"`, skip the following consecutive ASCII digits, and then read the ending `"e"`.
+
+    Unfortunately, nested lists and dictionaries are not as simple, because you don't know where they end. The solution that I arrived at was to simply create a nested container (which container depends on the next byte read: an `"l"` tells you to create a nested `UnkeyedContainer` while a `"d"` tells you to create a nested `KeyedContainer`) with *all the remaining data you're trying to parse*. Then you simply ask the container when it ends (which will cause the container to recursively parse all of *its* subcontainers), and set your index to that index.^[My initial explanation of this strategy to my friends was "i hate this but if you squint really really hard there's a certain elegance to it"]
+
+`KeyedContainer`
+:   In an effort to avoid duplicating the work I put into `UnkeyedContainer`s, the approach I took towards parsing `KeyedContainer`s was to read an ASCII `"d"` (throwing an error if any other byte is found), and then to pretend that that `"d"` was in fact an `"l"` and parse the rest of the data as an `UnkeyedContainer`. Then I iterate through the subcontainers of the fake `UnkeyedContainer` I have created, treating each odd element as a key (ensuring it is a `SingleValueContainer` containing a string) and each following even element as the corresponding value. If the `UnkeyedContainer` has an odd number of subcontainers, then there is a key missing a value, so we throw an error indicating that. Then we just set our index to the index of the `UnkeyedContainer`.
+
+While this is kind of cursed, it works fine...in theory. In practice, I noticed that one of my decoding tests was failing. I did some debugging, got a sense of where it was failing, and wrote more tests...which meant I had more failing tests. Eventually I narrowed down the bug to my decoding failing when I had dictionaries inside some other container (a list or another dictionary).
+
+Now that I knew that dictionaries inside other containers fail, I needed to find out why. I did a *bunch* of running tests with breakpoints to step through nested containers, and everything seemed to be working fine until I got to the end of the inner dictionary. It pretends that it's unkeyed fine, parses all subcontainers fine, matches up keys and values fine, but when it tries to set its index to the index of the fake unkeyed container, somehow it jumps backwards in the data stream.
+
+The eventual conclusion that I came to was that in all other cases where I was passing subranges of data around, because I wasn't performing any other operations on the data (essentially saying "take all the data from index $x$ to index $y$"), Swift was using slices --- referring back to the original allocation of data --- which meant that indices would not always start at 0. This didn't cause any problems because I was careful and used the `startIndex` property of the data. However, when I created the fake `UnkeyedContainer` inside the `KeyedContainer`, I inadvertently forced Swift to allocate and initialize a new Data object, which caused indices to be different.
+
+The line that was causing the problem was:
+```swift
+let unkeyedContainer = UnkeyedContainer(data: [UInt8(ascii: "l")] + self.data.suffix(from: self.index))
+```
+
+and I fixed it with this change later on:
+```diff
+- self.index = unkeyedContainer.index
++ self.index = self.data.endIndex.advanced(by: unkeyedContainer.data.endIndex.distance(to: unkeyedContainer.index))
+```
+which ensures that our index is as far from the *end* of the data as the fake unkeyed container's index is.
+
+### Bugs and Corner-Cases
+
+There are a couple of insidious bugs and odd corner cases that I found while implementing bencode.
+
+#### Multi-byte characters
+
+I detailed this above in @sec-bencode-the-protocol, but the "length" prefix to a byte string is the number of bytes it takes up, not the number of characters. I originally did this wrong. Ironically, this is actually a rare example of a bug that's easy to make in newer, "higher-level" languages like Swift, while being hard to make accidentally in C. This is because Swift's concept of a string as "some valid Unicode text" blurs the line between byte count and character count, while C's concept of a string as "a list of `char`s (bytes) followed by a null byte" means that because it has no understanding of Unicode, all string length operations inherently return the byte count.
+
+#### Properly handle decoding `nil` keys
+
+Bencode does not support optional types. As such, I'm not sure why I needed to implement the `decodeNil(forKey:)` function for `KeyedContainer`s, since I would assume that `Optional`'s conformance to `Decodable` would just call `decodeIfPresent`, but the function was being called. My implementation was:
+```swift
+func decodeNil(forKey key: Key) throws -> Bool {
+    return !self.contains(key)
+}
+```
+which is essentially just saying "yes, the value for a given key is `nil` iff I don't have a subcontainer for that key."
+
+#### Unknown/unexpected keys in dictionaries {#sec-bencode-parsing-unknown-keys}
+
+The approach described in @sec-bencode-single-pass-parsing will always parse and collect all the keys in a bencoded dictionary. However, since we are using `Codable`, we know exactly which keys an object expects to find in a dictionary. An error is already thrown when an expected key is missing,[^missingkeys] but we need to decide what happens when there are extra keys we aren't expecting.
+
+[^missingkeys]: The beauty of this approach is that we aren't even the ones to throw an error in this case! It's handled by the implementation of `init(from:)` on the type itself, whether that is a synthesized implementation or a manual implementation.
+
+There are three options for how to handle this:
+
+Accept unknown keys
+:   This is appealing because it doesn't introduce any more errors; that is, it wouldn't reject any valid bencode because of unexpected keys. Additionally, the `JSONDecoder` provided by Swift accepts extra keys, so we'd be matching the typical behavior of decoders. However, due to how Swift's `Codable` system works, the parsed keys cannot be accessed despite being properly parsed, which may be unexpected and not desired.
+
+Reject unknown keys
+:   Although this does introduce errors where there otherwise were none, it means that we always know that we got exactly the data that we were expecting.
+
+\todo{i'm not sure i like the wording of either of the above}
+
+Configurable on a case-by-case basis
+:   This achieves the best of both worlds since the behavior can be configured by the user at the decoding site. It allows enforcing that no extra keys are present when the situation requires it (such as @sec-torrent-files-info-hash). Of course, we still need to define a default behavior. I went with accepting unknown keys to match `JSONDecoder` and work in more situations, although I set the option to error on unknown keys in most places where I use the decoder.
+
+\todo{better join?}
+
+Implementation details:
+
+`KeyedContainer` is actually a generic type with a type parameter `Key` that conforms to `CodingKey`. `CodingKey` is "\[a\] type that can be used as a key for encoding and decoding" (@noauthor_codingkey_nodate). It's typically implemented as an `enum` with a raw value of type `String`, but technically anything convertible to a string can be used. `CodingKey` implementations are usually also synthesized, but you need to specify them yourself when a property name on your type is not in the same format as in the encoded representation. For example:
+```swift
+struct Example: Codable {
+    let theProperty: Int
+
+    enum CodingKeys: String, CodingKey {
+        case theProperty = "the_property"
+    }
+}
+```
+will parse an encoded key `"the_property"` and assign it to `theProperty`.
+
+In our code handling `KeyedContainer`s, we get dictionary keys as strings, which we then must parse into something that conforms to CodingKey. If we want to restrict to only the keys expected by the type, we can use the failable initializer `Key(stringValue:)`, which will return a `CodingKey` iff the given string key is expected by the type. If the key is not expected by the type, then we throw a decoding error.
+
+If we want to accept any key, even unexpected keys, we need to use a type conforming to `CodingKey` whose creation will always succeed. I created an `AnyCodingKey` type that does exactly this, taking a string and using it as a key.
+
+\todo{does this need to be explained further?}
+
+#### Leading zeros in integers {#sec-bencode-parsing-leading-zeros}
+
+@bep0003 says of integers:
+
+> All encodings with a leading zero, such as `i03e`, are invalid, other than `i0e`, which of course corresponds to 0.
+
+This felt like a silly restriction to me, and it was easier to parse integers if I ignored it (because I could simply read ASCII `"i"`, read some character that was either `"-"` or an ASCII digit, read while the current character was an ASCII digit, read an ASCII `"e"`, and then concatenate and parse all the digits), so I initially ignored this restriction. However, @bep0003 later goes on to say:
+
+> Note that this is a substring of the metainfo file. The info-hash must be the hash of the encoded form as found in the .torrent file, which is identical to bdecoding the metainfo file, extracting the info dictionary and encoding it *if and only if* the bdecoder fully validated the input (e.g. key ordering, absence of leading zeros). Conversely that means clients must either reject invalid metainfo files or extract the substring directly. They must not perform a decode-encode roundtrip on invalid data.
+
+which motivated me to make my decoder completely compliant. Like in @sec-bencode-parsing-unknown-keys, I exposed a configurable option on decoders that controls whether this rule is strictly enforced.
+
+#### Strict dictionary ordering
+
+@bep0003 also says that "\[dictionary\] \[k\]eys must be strings and appear in sorted order (sorted as raw strings, not alphanumerics)." Though this may seem silly at first glance (since dictionaries are inherently unordered), it's important for the standard to specify the order so that different implementations produce the same "correct" output. Thus, I originally sorted dictionaries by their keys while encoding, but did not enforce any particular order while decoding. For the same reason as in @sec-bencode-parsing-leading-zeros, I later added a configurable option for whether to strictly enforce ordering of dictionary keys.
+
+The tricky part to keep in mind is that we compare the keys as byte arrays, not as strings. For example, Swift's strings are comparable, but they perform comparisons after normalizing using "Unicode Normalization Form D." I believe that this is what we want *most* of the time, but that's not good enough, so I implemented a custom operator that compares strings by converting them to bytes using UTF-8 and then comparing each pair of bytes in order.
+
+This is a safe strategy because we know that encoding the strings as UTF-8 will always succeed. For decoding, the key string is created by parsing data as UTF-8 in the first pace, and that is always a reversible operation. For encoding, while it is possible that the encoding will fail,[^utf8encoding] the encoding process would have failed anyway later in the pipeline.
+
+[^utf8encoding]: I actually don't know whether it's true that this encoding can fail. Swift strings are always valid Unicode \todo{cite?}, and I believe that UTF-8 can encode all valid Unicode. I suspect that the function is failable because you can try to encode strings using encodings such as ASCII, which can fail for strings that contain characters not encodable as ASCII.
+
+#### Extra data at the end
+
+This is actually not technically an error according to the specification, but I believe that it is a usage error, so I wanted to have an option that causes it to throw an error. The (alleged) error in question is what happens when the data being decoded has one complete bencode object, but then has data left over after the end. This was a particularly tricky bug to "solve," due to how I had to implement `UnkeyedContainer`s and `KeyedContainer`s as taking all the remaining data and reporting their own end index.
+
+I eventually solved it by adding an internal `topLevel` flag to the decoder, which defaults to `true` (so that end-user use works) but is set to false whenever the decoder is called recursively. What the flag does is control whether the decoder checks to ensure that the index of the top-level container is equal to the end index of the data of that container, and throw an error if not.
+
+#### Dictionaries keyed by non-unicode strings
+
+The original specification is a bit unclear about strings, but @bep0052 clarifies:
+
+> Note that in the context of bencoding strings including dictionary keys are arbitrary byte sequences (`uint8_t[]`).
+> 
+> BEP authors are encouraged to use ASCII-compatible strings for dictionary keys and UTF-8 for human-readable data. Implementations must not rely on this.
+
+However, Swift does not (easily) support creating dictionaries whose keys are raw data and not strings. At the present time I require that all keys must be strings (i.e., valid Unicode encoded using UTF-8).
 
 ***
 
