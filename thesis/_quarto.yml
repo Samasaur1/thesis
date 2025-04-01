@@ -39,6 +39,10 @@ abbrs:
   UTF-8: Unicode Transformation Format 8
   URL: Uniform Resource Locator
   SHA1: Secure Hashing Algorithm 1
+spectra:
+  dictionary: |
+    A list of key-value pairs, unordered unless specified otherwise. Also known as an "associative array" or "map."
+
 division: Mathematics and Natural Sciences
 department: Computer Science
 advisor: Erica Blum
