@@ -23,6 +23,8 @@ quarto render --to pdf
 - switch back to using pandoc's citeproc and <https://pandoc.org/MANUAL.html#placement-of-the-bibliography> to place the bibliography in the right location
 - use the section symbol when referring to sections? <https://tex.stackexchange.com/questions/208933/how-to-show-symbol-when-i-refer-a-chapter>
 - improve hexdump formatting
+- change big number font (it doesn't match section numbers)
+- improve swift syntax highlighting
 
 ## references
 

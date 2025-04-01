@@ -29,3 +29,30 @@ There are many implementations of BitTorrent out there, just as there are many e
 I'll cite @gauck_implementing_2022 just to ensure the bibliography has an entry.
 
 \todo{add diagrams}
+
+***
+
+Here I will cite all my sources so that you can see how they will all show up:
+
+- @noauthor_codingkey_nodate
+- @zmuda_flight_2018
+- @gauck_implementing_2022
+- @noauthor_bittorrent_2017
+- @noauthor_flight-schoolmessagepack_2025
+- @bep0003
+- @bep0005
+- @bep0006
+- @bep0009
+- @bep0012
+- @bep0015
+- @bep0017
+- @bep0019
+- @bep0023
+- @bep0027
+- @bep0052
+
+Specifically, I'd like the BEPs (@bep0003 and below) to show up as "BEP 0003 [-@bep0003]" instead of "[@bep0003]" or "@bep0003".
+
+Also note how I have @zmuda_flight_2018 and @noauthor_flight-schoolmessagepack_2025, which are a PDF and the GitHub repository that accompanies it.
+
+You can also check to see how the full citations are rendered in the bibliography.

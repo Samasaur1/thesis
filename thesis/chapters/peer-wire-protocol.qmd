@@ -6,7 +6,7 @@ Once a connection has been established between peers, the peer wire protocol beg
 
 To begin a peer wire connection, both peers must send a *handshake*. This is a specific sequence of bytes that assure each peer that the other is using the same protocol, so that they can be confident that the messages they send will not be misinterpreted. The BitTorrent peer wire protocol handshake looks like this:
 
-```
+```hexdump
 00000000  13 42 69 74 54 6f 72 72  65 6e 74 20 50 72 6f 74  |.BitTorrent Prot|
 00000010  6f 63 6f 6c 00 00 00 00  00 00 00 00 31 31 31 31  |ocol........1111|
 00000020  31 31 31 31 31 31 31 31  31 31 31 31 31 31 31 31  |1111111111111111|
