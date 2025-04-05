@@ -1,0 +1,15 @@
+# Draft check-in {.unnumbered}
+
+I have added the structure of my thesis as I'm currently thinking of it to this document --- see the table of contents or the sections in each chapter.
+
+Most of my todos are marked with bright orange todonotes throughout the document, so I will not repeat those here. The other todos are to finish the remaining chapters (obviously), and then:
+
+- add diagrams and/or visualization screenshots
+- go through my implementation and make sure everything that I implement is explained at some point in the document
+- go through @gauck_implementing_2022 and see whether i'm missing anything
+- potentially add a chapter on language and technology choice? specifically i want to complain about the socket libraries
+- have my friends (non-technical readers) give it a read through and see whether it logically follows and builds on itself
+
+I need to link to whichever appendices I end up writing somewhere --- maybe have a section in the introduction explaining how there are appendices giving background knowledge that may be helpful, and also how the structure of most chapters gives a general overview and then goes into increasing levels of detail into the implementation, and you can read as far into each chapter as you want before going on to the next.
+
+I'm also not sure that I'm allowed to use the list of spectra to write definitions as I did in this draft. I think that it might be the equivalent of the list of tables/list of figures, but for definitions within my thesis. If so, I need to find another place to put basic preliminary definitions.

@@ -356,7 +356,7 @@ Reject unknown keys
 \todo{i'm not sure i like the wording of either of the above}
 
 Configurable on a case-by-case basis
-:   This achieves the best of both worlds since the behavior can be configured by the user at the decoding site. It allows enforcing that no extra keys are present when the situation requires it (such as @sec-torrent-files-info-hash). Of course, we still need to define a default behavior. I went with accepting unknown keys to match `JSONDecoder` and work in more situations, although I set the option to error on unknown keys in most places where I use the decoder.
+:   This achieves the best of both worlds since the behavior can be configured by the user at the decoding site. It allows enforcing that no extra keys are present when the situation requires it (such as @sec-metainfo-files-info-hash). Of course, we still need to define a default behavior. I went with accepting unknown keys to match `JSONDecoder` and work in more situations, although I set the option to error on unknown keys in most places where I use the decoder.
 
 \todo{better join?}
 
