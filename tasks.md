@@ -33,3 +33,7 @@
 - start from metainfo file
 - multifile torrent support (cuttable)
 - gui? stretch goal?
+
+2025-04-18
+- rewrite narrative section on p14 to be spec-based and then add a section at the end of the chapter that is "process of writing and debugging"
+- p12 "and now i am going to implement serialization"

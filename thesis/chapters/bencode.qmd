@@ -10,15 +10,13 @@ Bencode supports serializing and deserializing four types:
     
     For example, we would encode `5` as `i5e`, we would encode `-21` as `i-21e`, etc.
 
-2. "byte strings" are encoded as `<length of string>:<data of string>`
+2. "byte strings" are encoded as `<length of string data>:<data of string>`
 
     For example, we would encode `Hi` as `2:Hi`, we would encode `Hello, world!` as `13:Hello, world!`, etc.
 
-    This type works for non-ASCII strings as well. We would encode `ü` as `2:ü`. Note that the length of this string is still 2, because the length is measured in bytes, not the more nebulous "characters", and `ü` in UTF-8 is represented using two bytes.
+    Note that the length of the string is the number of bytes that the encoded string takes up, not the number of characters, which means that `café` would be encoded as `5:café`, because `é` in UTF-8 is represented using two bytes.[^moremultibyte]
 
-    However, in reality it's not that simple. While you can encode `ü` in two bytes, you can also use the visually identical `ü` which is represented using three bytes.
-
-    \todo{I don't really want or need to talk about variable length encoding. The important part to cover here is that we take the number of bytes instead of the number of characters. Do I even need to mention that you can use the Unicode character or the combining dieresis?}
+    [^moremultibyte]: We go into more detail on this in @sec-multi-byte-characters.
 
     This is also the type used for data that is not a valid string in any encoding scheme, such as `0x00 0x00 0x01 0x00 0x00`. This would be encoded as `0x35 0x3A 0x00 0x00 0x01 0x00 0x00` (`0x35` is the byte for `5` and `0x3A` is the byte for `:`).
 
@@ -188,66 +186,64 @@ Many types in the standard library already conform to `Codable`, such as `Int`, 
 
 ### my actual approach
 
-not sure where to put this but I think it is handy:
+There are four "levels" of API complexity in Swift's Codable system:
 
-> There are four "levels" of API complexity in Swift's Codable system:
-> 
-> 1. Top level encoding/decoding: `JSONEncoder().encode(obj)`
-> 2. Conforming to `Codable` (synthesized):
-> 
->     ```swift
->     struct ExampleType: Codable {
->         let key: String
->         let other: [Int]
->     }
->     ```
-> 
-> 3. Conforming to `Codable` (manual):
-> 
->     ```swift
->     struct ExampleType: Codable {
->         let key: String
->         let other: [Int]
-> 
->         enum CodingKeys: String, CodingKey {
->             case key, other
->         }
-> 
->         func encode(to encoder: any Encoder) throws {
->             var container = encoder.container(keyedBy: CodingKeys.self)
->             try container.encode(self.key, forKey: .key)
->     
->             // Because [Int] conforms to Encodable, the following line works
->             // try container.encode(self.other, forKey: .other)
->     
->             // For explanatory purposes, this is how you would do so manually
->             var nestedContainer = container.nestedUnkeyedContainer(forKey: .other)
->             for el in other {
->                 try nestedContainer.encode(el)
->             }
->         }
->     
->         init(from decoder: any Decoder) throws {
->             let container = try decoder.container(keyedBy: CodingKeys.self)
->             self.key = try container.decode(String.self, forKey: .key)
->     
->             // Because [Int] conforms to Decodable, the following line works
->             // self.other = try container.decode([Int].self, forKey: .other)
->     
->             // For explanatory purposes, this is how you would do so manually
->             var tempArray = [Int]()
->             var nestedContainer = try container.nestedUnkeyedContainer(forKey: .other)
->             while let el = try nestedContainer.decodeIfPresent(Int.self) {
->                 tempArray.append(el)
->             }
->             self.other = tempArray
->         }
->     }
->     ```
-> 
-> 4. Implementing a serialization system
+1. Top level encoding/decoding: `JSONEncoder().encode(obj)`
+2. Conforming to `Codable` (synthesized):
 
-Although the usual API is pretty simple, implementing a serialization dives into the complex parts of the system.
+    ```swift
+    struct ExampleType: Codable {
+        let key: String
+        let other: [Int]
+    }
+    ```
+
+3. Conforming to `Codable` (manual):
+
+    ```swift
+    struct ExampleType: Codable {
+        let key: String
+        let other: [Int]
+
+        enum CodingKeys: String, CodingKey {
+            case key, other
+        }
+
+        func encode(to encoder: any Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(self.key, forKey: .key)
+    
+            // Because [Int] conforms to Encodable, the following line works
+            // try container.encode(self.other, forKey: .other)
+    
+            // For explanatory purposes, this is how you would do so manually
+            var nestedContainer = container.nestedUnkeyedContainer(forKey: .other)
+            for el in other {
+                try nestedContainer.encode(el)
+            }
+        }
+    
+        init(from decoder: any Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            self.key = try container.decode(String.self, forKey: .key)
+    
+            // Because [Int] conforms to Decodable, the following line works
+            // self.other = try container.decode([Int].self, forKey: .other)
+    
+            // For explanatory purposes, this is how you would do so manually
+            var tempArray = [Int]()
+            var nestedContainer = try container.nestedUnkeyedContainer(forKey: .other)
+            while let el = try nestedContainer.decodeIfPresent(Int.self) {
+                tempArray.append(el)
+            }
+            self.other = tempArray
+        }
+    }
+    ```
+
+4. Implementing a serialization system.
+
+Although the usual API is pretty simple, implementing a serialization dives into the complex parts of the system, as we will now see.
 
 Encoders and decoders work on "containers," which can either be a `SingleValueContainer`, an `UnkeyedContainer`, or a `KeyedContainer` (think value, list of values, dictionary of values). For example, `ExampleType` would be made up of the following containers:
 
@@ -301,33 +297,21 @@ Decoding is much more complicated, because we aren't just producing data. Instea
     Unfortunately, nested lists and dictionaries are not as simple, because you don't know where they end. The solution that I arrived at was to simply create a nested container (which container depends on the next byte read: an `"l"` tells you to create a nested `UnkeyedContainer` while a `"d"` tells you to create a nested `KeyedContainer`) with *all the remaining data you're trying to parse*. Then you simply ask the container when it ends (which will cause the container to recursively parse all of *its* subcontainers), and set your index to that index.^[My initial explanation of this strategy to my friends was "i hate this but if you squint really really hard there's a certain elegance to it"]
 
 `KeyedContainer`
-:   In an effort to avoid duplicating the work I put into `UnkeyedContainer`s, the approach I took towards parsing `KeyedContainer`s was to read an ASCII `"d"` (throwing an error if any other byte is found), and then to pretend that that `"d"` was in fact an `"l"` and parse the rest of the data as an `UnkeyedContainer`. Then I iterate through the subcontainers of the fake `UnkeyedContainer` I have created, treating each odd element as a key (ensuring it is a `SingleValueContainer` containing a string) and each following even element as the corresponding value. If the `UnkeyedContainer` has an odd number of subcontainers, then there is a key missing a value, so we throw an error indicating that. Then we just set our index to the index of the `UnkeyedContainer`.
-
-While this is kind of cursed, it works fine...in theory. In practice, I noticed that one of my decoding tests was failing. I did some debugging, got a sense of where it was failing, and wrote more tests...which meant I had more failing tests. Eventually I narrowed down the bug to my decoding failing when I had dictionaries inside some other container (a list or another dictionary).
-
-Now that I knew that dictionaries inside other containers fail, I needed to find out why. I did a *bunch* of running tests with breakpoints to step through nested containers, and everything seemed to be working fine until I got to the end of the inner dictionary. It pretends that it's unkeyed fine, parses all subcontainers fine, matches up keys and values fine, but when it tries to set its index to the index of the fake unkeyed container, somehow it jumps backwards in the data stream.
-
-The eventual conclusion that I came to was that in all other cases where I was passing subranges of data around, because I wasn't performing any other operations on the data (essentially saying "take all the data from index $x$ to index $y$"), Swift was using slices --- referring back to the original allocation of data --- which meant that indices would not always start at 0. This didn't cause any problems because I was careful and used the `startIndex` property of the data. However, when I created the fake `UnkeyedContainer` inside the `KeyedContainer`, I inadvertently forced Swift to allocate and initialize a new Data object, which caused indices to be different.
-
-The line that was causing the problem was:
-```swift
-let unkeyedContainer = UnkeyedContainer(data: [UInt8(ascii: "l")] + self.data.suffix(from: self.index))
-```
-
-and I fixed it with this change later on:
-```diff
-- self.index = unkeyedContainer.index
-+ self.index = self.data.endIndex.advanced(by: unkeyedContainer.data.endIndex.distance(to: unkeyedContainer.index))
-```
-which ensures that our index is as far from the *end* of the data as the fake unkeyed container's index is.
+:   In an effort to avoid duplicating the work I put into `UnkeyedContainer`s, the approach I took towards parsing `KeyedContainer`s was to read an ASCII `"d"` (throwing an error if any other byte is found), and then to pretend that that `"d"` was in fact an `"l"` and parse the rest of the data as an `UnkeyedContainer`. Then I iterate through the subcontainers of the fake `UnkeyedContainer` I have created, treating each odd element as a key (ensuring it is a `SingleValueContainer` containing a string) and each following even element as the corresponding value. If the `UnkeyedContainer` has an odd number of subcontainers, then there is a key missing a value, so we throw an error indicating that. Finally, we calculate the distance from the index of the `UnkeyedContainer` to the end of the data, and set the index of the `KeyedContainer` to be the same distance from the end of the data.
 
 ### Bugs and Corner-Cases
 
 There are a couple of insidious bugs and odd corner cases that I found while implementing bencode.
 
-#### Multi-byte characters
+#### Multi-byte characters {#sec-multi-byte-characters}
 
-I detailed this above in @sec-bencode-the-protocol, but the "length" prefix to a byte string is the number of bytes it takes up, not the number of characters. I originally did this wrong. Ironically, this is actually a rare example of a bug that's easy to make in newer, "higher-level" languages like Swift, while being hard to make accidentally in C. This is because Swift's concept of a string as "some valid Unicode text" blurs the line between byte count and character count, while C's concept of a string as "a list of `char`s (bytes) followed by a null byte" means that because it has no understanding of Unicode, all string length operations inherently return the byte count.
+As explained above in @sec-bencode-the-protocol, the "length" prefix to a byte string is the number of bytes it takes up, not the number of characters in the string. I originally did this wrong, using the `count` property on strings. This is especially tricky because encoding based on the number of characters works fine so long as all the characters in the string are single-byte characters (as all ASCII characters are when using UTF-8).
+
+Ironically, this is actually a rare example of a bug that's easy to make in newer, "higher-level" languages like Swift, while being hard to make accidentally in C. This is because Swift's concept of a string as "a list of valid Unicode characters" blurs the line between byte count and character count, while C's concept of a string as "a list of `char`s (bytes) followed by a null byte" means that because it has no understanding of Unicode, all string length operations inherently return the byte count.
+
+We solve this problem in Swift by encoding the string to its UTF-8 representation, counting the number of bytes produced, and using that number.[^multibytecharacters]
+
+[^multibytecharacters]: What's especially nice about this method is that it properly handles variable length encoding as well: For example, `ü` and `ü` are visually identical, but the first is encoded in two bytes while the second is encoded in three bytes. However, our approach works equally well on both of those without any special handling.
 
 #### Properly handle decoding `nil` keys
 
@@ -400,7 +384,7 @@ The tricky part to keep in mind is that we compare the keys as byte arrays, not 
 
 This is a safe strategy because we know that encoding the strings as UTF-8 will always succeed. For decoding, the key string is created by parsing data as UTF-8 in the first pace, and that is always a reversible operation. For encoding, while it is possible that the encoding will fail,[^utf8encoding] the encoding process would have failed anyway later in the pipeline.
 
-[^utf8encoding]: I actually don't know whether it's true that this encoding can fail. Swift strings are always valid Unicode \todo{cite?}, and I believe that UTF-8 can encode all valid Unicode. I suspect that the function is failable because you can try to encode strings using encodings such as ASCII, which can fail for strings that contain characters not encodable as ASCII.
+[^utf8encoding]: I actually don't know whether it's true that this encoding can fail. Swift strings are always valid Unicode [@noauthor_string_nodate], and UTF-8 can encode all valid Unicode. I suspect that the function is failable because you can try to encode strings using encodings such as ASCII, which can fail for strings that contain characters not encodable as ASCII.
 
 #### Extra data at the end
 
@@ -418,16 +402,19 @@ The original specification is a bit unclear about strings, but @bep0052 clarifie
 
 However, Swift does not (easily) support creating dictionaries whose keys are raw data and not strings. At the present time I require that all keys must be strings (i.e., valid Unicode encoded using UTF-8).
 
-***
+#### Calculating the end index of `KeyedContainer`s
 
-\todo{this can probably just be removed?}
+I described above how the index of a `KeyedContainer` is calculated by taking the distance from the final index of the fake `UnkeyedContainer` to the end of the data, and then setting the final index of the `KeyedContainer` to be that same distance from the end of the data. Originally, however, this was not the approach I took, as I instead simply set the final index of the `KeyedContainer` to the final index of the fake `UnkeyedContainer`.
 
-Here's the entire description of bencode from the original BitTorrent protocol specification:
+\todo{clearly distinguish between "final index" (aka index after all parsing is done) and "end index". actually do i need to distinguish these}
 
-> bencoding
->
-> - Strings are length-prefixed base ten followed by a colon and the string. For example `4:spam` corresponds to 'spam'.
-> - Integers are represented by an 'i' followed by the number in base 10 followed by an 'e'. For example `i3e` corresponds to 3 and `i-3e` corresponds to -3. Integers have no size limitation. `i-0e` is invalid. All encodings with a leading zero, such as `i03e`, are invalid, other than `i0e`, which of course corresponds to 0.
-> - Lists are encoded as an 'l' followed by their elements (also bencoded) followed by an 'e'. For example `l4:spam4:eggse` corresponds to ['spam', 'eggs'].
-> - Dictionaries are encoded as a 'd' followed by a list of alternating keys and their corresponding values followed by an 'e'. For example, `d3:cow3:moo4:spam4:eggse` corresponds to {'cow': 'moo', 'spam': 'eggs'} and `d4:spaml1:a1:bee` corresponds to {'spam': ['a', 'b']}. Keys must be strings and appear in sorted order (sorted as raw strings, not alphanumerics).
+However, this did not work whenever a dictionary was embedded inside some other container (a list or another dictionary). More precisely, upon setting the final index of the `KeyedContainer`, the index would "jump backward" by an (inconsistent) small number of bytes.
 
+The eventual conclusion that I came to was that in all other cases where I was passing subranges of data around, because I wasn't performing any other operations on the data (essentially saying "take all the data from index $x$ to index $y$"), Swift was using slices --- referring back to the original allocation of data --- which meant that indices would not always start at 0. This didn't cause any problems because I was careful and used the `startIndex` property of the data. However, when I created the fake `UnkeyedContainer` inside the `KeyedContainer`, I inadvertently forced Swift to allocate and initialize a new Data object, which caused indices to be different. Computing the distance from the final index of the container to the end of the data (which is the only distance that's actually important in the first place) and using that instead solved this problem.
+
+### Approach to development
+
+\todo{flesh this out}
+
+- test-driven development
+- willingness to have failing tests that i later came back and fixed
