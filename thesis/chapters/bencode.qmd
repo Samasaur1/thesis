@@ -119,7 +119,7 @@ Bencode was pretty clearly designed to be easy to parse in a single pass, in whi
 
 When the process is done, an end-user has one of: integer, string, data, list of anything, or dictionary of string to anything.[^anybencodable]
 
-[^anybencodable]: Although we know that this isn't really anything and is instead any bencodable type, the compiler's type system does not know that. \todo{probably could have created a `Bencodable` protocol but the usefulness is debatable}
+[^anybencodable]: Although we know that this isn't really anything and is instead any bencodable type, the compiler's type system does not know that.
 
 ### Parsing into typed objects
 
@@ -269,8 +269,7 @@ the encoder would create a `KeyedContainer`, then create a `SingleValueContainer
 
 To decode into an object of this type, the decoder simply runs the process "in reverse": create a `KeyedContainer`, decode a `String` for the key `"key"` (which transparently creates and decodes from a `SingleValueContainer`), create an `UnkeyedContainer`, and then decode as many integers as that container contains (each one transparently decoded through a `SingleValueContainer`).
 
-This does a great job abstracting over the actual binary formats, letting each type define its encoding and decoding in terms of these three container types without worrying about any specific serialization format or having to convert from data.
-However, that complexity needs to go somewhere, and it falls on the implementer of the encoder and decoder. \todo{rephrase? join better with following paragraph?}
+This does a great job abstracting over the actual binary formats, letting each type define its encoding and decoding in terms of these three container types without worrying about any specific serialization format or having to convert to or from data. However, that complexity needs to go somewhere, and it falls on the implementer of the encoder and decoder.
 
 Encoding is actually pretty easy. Here's how we handle the three types of containers:
 
@@ -380,11 +379,9 @@ which motivated me to make my decoder completely compliant. Like in @sec-bencode
 
 @bep0003 also says that "\[dictionary\] \[k\]eys must be strings and appear in sorted order (sorted as raw strings, not alphanumerics)." Though this may seem silly at first glance (since dictionaries are inherently unordered), it's important for the standard to specify the order so that different implementations produce the same "correct" output. Thus, I originally sorted dictionaries by their keys while encoding, but did not enforce any particular order while decoding. For the same reason as in @sec-bencode-parsing-leading-zeros, I later added a configurable option for whether to strictly enforce ordering of dictionary keys.
 
-The tricky part to keep in mind is that we compare the keys as byte arrays, not as strings. For example, Swift's strings are comparable, but they perform comparisons after normalizing using "Unicode Normalization Form D." I believe that this is what we want *most* of the time, but that's not good enough, so I implemented a custom operator that compares strings by converting them to bytes using UTF-8 and then comparing each pair of bytes in order.
+The tricky part to keep in mind is that we compare the keys as byte arrays, not as strings. For example, Swift's strings are comparable, but they perform comparisons after normalizing using "Unicode Normalization Form D." I believe that this is what we want *most* of the time, but that's not good enough, so I implemented a custom operator that compares strings by converting them to bytes using UTF-8 and then comparing each pair of bytes in order.[^stringcompare]
 
-This is a safe strategy because we know that encoding the strings as UTF-8 will always succeed. For decoding, the key string is created by parsing data as UTF-8 in the first pace, and that is always a reversible operation. For encoding, while it is possible that the encoding will fail,[^utf8encoding] the encoding process would have failed anyway later in the pipeline.
-
-[^utf8encoding]: I actually don't know whether it's true that this encoding can fail. Swift strings are always valid Unicode [@noauthor_string_nodate], and UTF-8 can encode all valid Unicode. I suspect that the function is failable because you can try to encode strings using encodings such as ASCII, which can fail for strings that contain characters not encodable as ASCII.
+[^stringcompare]: Although I was initially concerned that this might be an unsafe method of comparison, I later confirmed that this was not the case. Notably, Swift strings are always valid Unicode [@noauthor_string_nodate], and UTF-8 can encode all valid Unicode. Therefore, since the operator is itself limited to strings, we know that it will always succeed. (More specifically, when encoding the values are Swift strings and thus valid Unicode, and when decoding the key string is created by parsing data as UTF-8 in the first place, so if the potential key string is not valid UTF-8 we will have already encountered an error.)
 
 #### Extra data at the end
 
