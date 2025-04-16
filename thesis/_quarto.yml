@@ -4,7 +4,7 @@ project:
   post-render: ./_prelims/cleanup.bash
 
 book:
-  title: "Sam's Thesis"
+  title: "Bit by Bit: Sam's Thesis"
   author: "Sam Gauck"
   date: "May 2025"
   date-format: "MMMM YYYY"

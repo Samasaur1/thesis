@@ -1,35 +1,236 @@
 # Metainfo Files {#sec-metainfo-files}
 
-## What is a metainfo file? / What purpose does it serve
+A BitTorrent download begins with the *metainfo file* (also known as the *torrent file* due to the customary `.torrent` file extension). The metainfo file is a small file that contains the metadata (hence the name) about the torrent to be downloaded, as a dictionary serialized via Bencode (described in detail in @sec-bencode). In the original version of the BitTorrent protocol [@bep0003], the metainfo file is necessary for the BitTorrent process[^metainfo-files-not-required] and must be acquired via a side channel (typically downloaded from a BitTorrent indexer site).
+
+[^metainfo-files-not-required]: Metainfo files can be replaced by *magnet links*, which are defined in @bep0009 and described in more detail in @sec-extensions-magnet-links. It's worth noting that that extension removes the need to acquire the metainfo file via a side channel, but the same information contained in the metainfo file is still needed.
+
+## Purpose of a metainfo file
+
+BitTorrent is a distributed process, but even a distributed process needs to start somewhere. A metainfo file contains information about the torrent to be downloaded. This includes the name of the torrent, how to find peers from whom you can get pieces of the torrent, how the torrent was split into pieces (and thus how to put it back together), and how to know when the torrent is complete. Without this information, a BitTorrent download cannot happen.
+
+\todo{expand this? or combine with above?}
 
 ## Structure of a metainfo file
 
-- v1 and v2 metainfo files exist. big difference in how files are stored
-- metainfo files have some toplevel keys and then have an info dictionary with more keys within it
+As described above, every metainfo file is a dictionary. Each one has some top-level keys, including the `info` key, which maps to a dictionary containing a number of sub-keys. There are a given set of keys defined in @bep0003 that must be in the metainfo file for it to be valid. There are also some keys commonly used by the community, as well as some keys defined in extensions to the original protocol (described in more detail in @sec-extensions-metainfo-file)).
+
+There are two versions of the metainfo file that I will describe: "v1" metainfo files (described in the original BitTorrent specification [@bep0003]) and "v2" metainfo files (described in version 2 of the BitTorrent specification [@bep0052]). Although both versions follow the general format laid out above, and there are many similarities, there is a large difference in how the file(s) that make up the torrent are represented.
 
 ### v1 metainfo files
 
+Unless specified otherwise, all keys listed below must be present for a v1 metainfo file to be valid. Note also that these keys are those and only those defined in the original BitTorrent specification; other keys (and the specifications that define them) are detailed in @sec-extensions-metainfo-file.
+
+\todo{"specifications that define them" -> "BEPs"?}
+
 #### Top-level keys
 
-#### Keys in the info dictionary
+`announce`
+:   The URL of the tracker (see @sec-trackers for more details). In practice, this value is usually superseded by the tracker URLs as defined in @bep0012 (see @sec-extensions-multitracker for more details); nevertheless, it still must always be present.
+
+`info`
+:   The info dictionary, which in turn contains its own sub-keys (detailed in @sec-metainfo-files-v1-info-dict). The distinction between keys at the top-level of the metainfo file and keys in the info dictionary is important because the serialized form of the info dictionary is used as an identifier for the torrent as a whole (see @sec-metainfo-files-info-hash for more details). This allows for changing out the tracker URL without invalidating the entire torrent.
+
+##### Optional (community-specified) keys
+
+The following keys are not part of the original BitTorrent specification, and thus are not required for a metainfo file to be valid. 
+
+`comment`
+:   Freeform text defined by the torrent creator. Usually this is either the same as the name of the torrent or is the site where the metainfo file can be found.
+
+`created by`
+:   Freeform information about the program used to create this metainfo file. Usually this consists of the program's name and version.
+
+`creation date`
+:   The Unix timestamp (number of seconds since January 1, 1970) at which this metainfo file was created
+
+`encoding`
+:   The text encoding used for strings in this file. I have never seen this not be UTF-8
+
+#### Keys in the info dictionary {#sec-metainfo-files-v1-info-dict}
+
+`name`
+:   The suggested name to to save this torrent as. Clients usually use the value for this key when displaying the corresponding torrent. The value of this key may be ignored (it is "purely advisory" [@bep0003]), but it still must always be present.
+
+`piece length`
+:   The size, in bytes, of each piece of the torrent. Unless the total length of the torrent is a perfect multiple of this value, the final piece will be shorter.
+
+`pieces`
+:   The (SHA1) hashes of the pieces of the torrent, concatenated in order. Because each SHA1 hash is 20 bytes long, the length of this data must be 20 times the number of pieces bytes long.[^hashes]
+
+[^hashes]: \todo{explain what hashes are and why we care.}
+
+`length` or `files`, but not both
+:   One and only one of these keys must be present (if neither or both keys are present, the metainfo file is invalid). Which key is present indicates whether the torrent described by this metainfo file will download a single file or a directory of files: if the `length` key is present, the torrent will download a single file, and the value of the key is the length (in bytes) of that file. If the `files` key is present, the torrent will download a directory of files, and the value of the key is as follows:
+
+    The value associated with the `files` key is a list of dictionaries. Each dictionary in the list represents one file downloaded by the torrent, and contains two keys: `length`, which is the length of the given file (in bytes); and `path`, which is a list of strings that represent the path to the given file relative to the directory chosen for the torrent to be downloaded to.
+
+    For example, if the `files` key has the value  
+    `ld6:lengthi1e4:pathl9:first.txteed6:lengthi5e4:pathl9:my_folder10:second.txteee`:
+
+    ```bencode
+    l
+      d
+        6:length
+          i1e
+        4:path
+          l
+            9:first.txt
+          e
+      e
+      d
+        6:length
+          i5e
+        4:path
+          l
+            9:my_folder
+            10:second.txt
+          e
+      e
+    e
+    ```
+
+    then it is describing two files. The first is 1 byte long and will be saved to `first.txt` inside the directory that the user chooses to save the torrent to. The second is 5 bytes long and will be saved to `second.txt` in a directory named `my_folder` inside the directory that the user chooses to save the torrent to.
+
+    Be aware that the order of the files given under the `files` key does matter. This is because, for the purposes of splitting a torrent into pieces, BitTorrent pretends that a multi-file torrents is really a extremely long single-file torrent, and it does so by concatenating all the files listed under the `files` key *in the order they are listed*. This is the only time that the order of these files is relevant, though it must be kept in mind in various parts of the implementation.
+
+##### Optional (community-specified) keys
+
+The following keys are not part of the original BitTorrent specification, and thus are not required for a metainfo file to be valid. 
+
+`md5sum`
+:   The MD5 hash of the file to be downloaded (as a hex-encoded string). If the torrent will download a single file, then this key is nested directly within the `info` dictionary. If the torrent will download a directory of files, then this key is nested within each dictionary in the list corresponding to the `files` key within the `info` dictionary. That is, the `files` key goes from a list of dictionaries containing `length` and `path` keys to a list of dictionaries containing `length`, `path`, *and* `md5sum` keys. Whether the torrent will download a single file or a directory of files, this key is always optional. Furthermore, because the `pieces` key stores the hashes of all the pieces of the torrent, this key isn't really necessary at all. That said, because it appears within the `info` dictionary, we cannot simply discard it immediately (see @sec-metainfo-files-info-hash for why).
+
+`sha1`
+:   The SHA1 hash of the file to be downloaded (as raw bytes). I've only seen this key in metainfo files created by one program, "MirrorBrain". MirrorBrain seems to only create single-file torrents, so as far as I know this key only appears nested directly within the `info` dictionary. Like `md5sum`, this key is optional and mostly irrelevant, yet must not be discarded since it is within the `info` dictionary
+
+`sha256`
+:   The SHA256 hash of the file to be downloaded (as raw bytes). I've only seen this key in metainfo files created by one program, "MirrorBrain". MirrorBrain seems to only create single-file torrents, so as far as I know this key only appears nested directly within the `info` dictionary. Like `md5sum`, this key is optional and mostly irrelevant, yet must not be discarded since it is within the `info` dictionary
+
+<!-- https://github.com/poeml/mirrorbrain/blob/76f2909e33004a7f5e0dd52b816881eb9fbd4246/mod_mirrorbrain/mod_mirrorbrain.c#L3273-L3294 -->
+
+\todo{cite MirrorBrain source code?}
 
 ### v2 metainfo files
 
+Unless specified otherwise, all keys listed below must be present for a v1 metainfo file to be valid. Note also that these keys are those and only those defined in the original BitTorrent specification; other keys (and the specifications that define them) are detailed in @sec-extensions-metainfo-file.
+
+\todo{i literally just copied and pasted that}
+
 #### Top-level keys
 
-#### Keys in the info dictionary
+`announce`
+:   The URL of the tracker (identical to the key with the same name in v1 metainfo files)
 
-#### Merkle trees? what? why?
+`info`
+:   The info dictionary, which in turn contains its own sub-keys (conceptually the same as the key with the same name in v1 metainfo files, but with (slightly) different contents, detailed in @sec-metainfo-files-v2-info-dict)
+
+`piece layers`
+:   The value of this key is a dictionary. For every file in the torrent larger than the piece length, there is one key-value mapping. The key is the root of the Merkle tree of that file (the `pieces root` key described below), while the value is a concatenation of hashes of the Merkle tree of that file, at the layer where each hash covers `piece length` bytes. See @sec-metainfo-files-merkle-trees for more information.
+
+#### Keys in the info dictionary {#sec-metainfo-files-v2-info-dict}
+
+`name`
+:   A suggested name to display this torrent (identical to the key with the same name in v1 info dictionaries, although described differently in the specification)
+
+`piece length`
+:   The size, in bytes, of each piece of the torrent (identical to the key with the same name in v1 info dictionaries)
+
+`meta version`
+:   The version of the BitTorrent protocol that this metainfo file was designed to use. In v2 metainfo files, the value of this property is 2. While it would be ideal to have v1 metainfo files have a value of 1 for this property, we can't update the protocol specification without it being a new version, so we assume that no value implies 1 and all version from v2 on will have this key.
+
+`file tree`
+:   The value of this key is a nested directory structure that, like the `files` key in a v1 metainfo file, describes the file(s) that make up the torrent. However, the structure is more complicated. Each non-empty dictionary key represents a path component[^unixpaths] of a file. When the entire path of a file has been described in terms of nested dictionaries, there is another nested dictionary with an empty key, which in turn maps to a dictionary containing `length` and `pieces root` keys. An example will make this structure easier to grasp:
+
+    \todo{fix this overflow}
+    For example, if the `files` key has the value  
+    `d9:first.txtd0:d6:lengthi1e11:pieces root32:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaee9:my_folderd10:second.txtd0:d6:lengthi5e11:pieces root32:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeeee`:
+
+    ```bencode
+    d
+      9:first.txt
+        d
+          0:
+            d
+              6:length
+                i1e
+              11:pieces root
+                32:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+            e
+        e
+      9:my_folder
+        d
+          10:second.txt
+            d
+              0:
+                d
+                  6:length
+                    i5e
+                  11:pieces root
+                    32:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                e
+            e
+        e
+    e
+    ```
+
+    then it is describing two files. The first is 1 byte long and will be saved to `first.txt` inside the directory that the user chooses to save the torrent to. The second is 5 bytes long and will be saved to `second.txt` in a directory named `my_folder` inside the directory that the user chooses to save the torrent to. (I have deliberately chosen to use the same file structure as the example given in @sec-metainfo-files-v1-info-dict for purposes of comparison.)
+
+    In the final level of nested dictionaries, the `length` key describes the length in bytes of the given file. The `pieces root` key is the root hash of a Merkle tree constructed from the parts of the file. See @sec-metainfo-files-merkle-trees for more information.
+
+[^unixpaths]: \todo{Here we'd need to have an explanation of how file paths work.}
+
+#### Merkle trees? what? why? {#sec-metainfo-files-merkle-trees}
+
+At this point you may be confused. What is a Merkle tree? Why are we using them? What was wrong with storing the hash of each piece? Those are all good questions, and the answers may not be immediately clear (they definitely were not immediately clear to me).
+
+\todo{merkle trees}
+
+##### What is a Merkle tree?
+
+A Merkle tree is a tree of hashes
+
+diagram here
+
+##### Why?
+
+reduces the amount of data in the info dict - does this matter, since we hash for ID anyway?
 
 ### Hybrid torrents
+
+> @bep0052 also introduces the notion of a *hybrid torrent*, which can be understood both by programs that can only read v1 metainfo files and by programs that can only read v2 metainfo files. 
 
 ### The difference between v1 and v2 metainfo files / how to convert between them perhaps?
 
 possibly switch the order of this section with the previous section
 
+## Info hashes {#sec-metainfo-files-info-hash}
+
+Torrents need an identifier throughout the process, and BitTorrent derives the identifier from the `info` dictionary. Specifically, the identifier is the SHA1 (v1) or SHA256 (v2) hash of the bencoded form of the info dictionary, *exactly as found in the metainfo file*. The specification notes how this "identical to bdecoding the metainfo file, extracting the info dictionary and encoding it if and only if the bdecoder fully validated the input (e.g. key ordering, absence of leading zeros)" [@bep0003]. However, this assumes that the bencode decoding process produces a dictionary containing exactly the keys found in the metainfo file, while our structured parsing approach does not make unexpected keys available (see @sec-bencode-parsing-unknown-keys for more details). So in our case, not only must we fully validate the input (which is the reason why I added configurable options to the bencode decoder to be strict when parsing), but we must either ensure that every key we decoded is reencoded when computing the info hash, or we need to compute the info hash differently.
+
+\todo{anything more to say about info hashes?}
+
 ## examples
 
-not sure if i want this section
+Here's an example v1 metainfo file (shown as nicely-formatted bencode):
+```bencode
+d
+  8:announce
+  ↳ 27:http://example.com/announce
+  8:encoding
+  ↳ 5:UTF-8
+  4:info
+  ↳ d
+  ↳   6:length
+  ↳   ↳ i14e
+  ↳   4:name
+  ↳   ↳ 6:v1.txt
+  ↳   12:piece length
+  ↳   ↳ i16384e
+  ↳   6:pieces
+  ↳   ↳ 20:<data>
+  ↳ e
+e
+```
 
 ## parsing
 
@@ -41,163 +242,4 @@ the actual parsing is pretty simple because i just use the bencode decoder descr
     - since we do (1) we need to make sure that we reencode all keys that we decoded, not just the keys that we expect
     - also any info dictionaries that aren't as compliant as the one we produce after reencoding means hashes don't match
 
-## The info dictionary
-
-### Info hashes
-
-I'm not sure where I want to put this section and its parent, but I need to put them somewhere, because I keep referring back to them from other chapters, and I need to be very explicit about info hashes.
-
-***
-
-What follows is the WIP version of this chaper, in the old structure
-
-> 0. conceptual metainfo file overview?
-> 1. explain that the big difference is in how files are stored
-> 2. explain v1
-> 3. explain v2
-> 4. synthesis chapter where we recount the differences
-> 
-> The BitTorrent process begins with the *metainfo file* (also known as the *torrent file* due to the customary `.torrent` file extension). The metainfo file is a small file that must be directly downloaded before starting the BitTorrent process and contains the necessary information to begin the BitTorrent process. There are significant differences between v1 and v2 metainfo files, but at a general level a metainfo file is a dictionary serialized via Bencode (described in detail in @sec-bencode).
-> \todo{"must" is a little strong. should probably reword to "acquire via side channel". also note that extensions can change this}
-> 
-> ## Common characteristics
-> 
-> ### Top-level keys
-> 
-> All metainfo files (v1 and v2) have the following keys:
-> 
-> `announce`
-> :   The URL of the tracker. Note that due to @bep0012 the value of this key is usually ignored, though it must still be present.
-> 
-> `info`
-> :   The info dictionary, which in turn contains its own sub-keys. The distinction between keys at the top-level of the metainfo file and keys in the info dictionary is important because the serialized form of the info dictionary is used as an identifier for the torrent as a whole (see @sec-info-hash for more details). This allows for changing out the tracker URL without invalidating the entire torrent.
-> 
-> ### The info dictionary
-> 
-> The info dictionary must have the following keys in both v1 and v2 metainfo files:
-> 
-> `name`
-> :   The display name of the torrent, which is usually used as the suggestion for where to save the downloaded file(s). Although it must be present, it is "purely advisory" [@bep0003; @bep0052] and could in theory be ignored by the torrent client.
-> `name`
-> :   The display name of the torrent, which is usually used as the suggestion for where to save the downloaded file(s). It must be present, although it is "purely advisory" [@bep0003; @bep0052] and could in theory be ignored by the torrent client.
-> 
-> `piece length`
-> :   The size, in bytes, of each piece of the torrent. Unless the total length of the torrent is a perfect multiple of this value, the final piece will be shorter.
-> 
-> ## Keys only present in v1 metainfo files
-> 
-> ### Top-level keys
-> 
-> All keys that must exist at the top level of a v1 metainfo file must also exist in a v2 metainfo file.
-> 
-> ### Keys in the info dictionary
-> 
-> `pieces`
-> :   The (SHA1) hashes of the pieces of the torrent, concatenated in order. Because each SHA1 hash is 20 bytes long, the length of this data must be 20 times the number of pieces bytes long.[^hashes]
-> 
-> [^hashes]: explain what hashes are and why we care.
-> 
-> `length` or `files`, but not both
-> :   One and only one of these keys must be present (if neither or both keys are present, the metainfo file is invalid). Which key is present indicates whether the torrent described by this metainfo file will download a single file or a directory of files: if the `length` key is present, the torrent will download a single file, and the value of the key is the length (in bytes) of that file. If the `files` key is present, the torrent will download a directory of files, and the value of the key is as follows:
-> 
->     The value associated with the `files` key is a list of dictionaries. Each dictionary in the list represents one file downloaded by the torrent, and contains two keys: `length`, which is the length of the given file (in bytes); and `path`, which is a list of strings that represent the path to the given file relative to the directory chosen for the torrent to be downloaded to.
-> 
->     For example, if the `files` key has the value  
->     `ld6:lengthi1e4:pathl9:first.txteed6:lengthi5e4:pathl9:my_folder10:second.txteee`:
-> 
->     ```bencode
->     l
->       d
->         6:length
->           i1e
->         4:path
->           l
->             9:first.txt
->           e
->       e
->       d
->         6:length
->           i5e
->         4:path
->           l
->             9:my_folder
->             10:second.txt
->           e
->       e
->     e
->     ```
-> 
->     then it is describing two files. The first is 1 byte long and will be saved to `first.txt` inside the directory that the user chooses to save the torrent to. The second is 5 bytes long and will be saved to `second.txt` in a directory named `my_folder` inside the directory that the user chooses to save the torrent to.
-> 
->     Be aware that the order of the files given under the `files` key does matter. This is because, for the purposes of splitting a torrent into pieces, BitTorrent pretends that a multi-file torrents is really a extremely long single-file torrent, and it does so by concatenating all the files listed under the `files` key *in the order they are listed*. This is the only time that the order of these files is relevant, though it must be kept in mind in various parts of the implementation.
-> 
-> ## Keys only present in v2 metainfo files
-> 
-> ### Top-level keys
-> 
-> `piece layers`
-> :   The value of this key is a dictionary. For every file in the torrent larger than the piece length, there is one key-value mapping. The key is the root of the Merkle tree of that file (the `pieces root` key described below), while the value is a concatenation of hashes of the Merkle tree of that file, at the layer where each hash covers `piece length` bytes. See @sec-merkle-hashes for more information.
-> 
-> ### Keys in the info dictionary
-> 
-> `meta version`
-> :   The version of the BitTorrent protocol that this metainfo file was designed to use. In v2 metainfo files, the value of this property is 2. While it would be ideal to have v1 metainfo files have a value of 1 for this property, we can't update the protocol specification without it being a new version, so we assume that no value implies 1 and all version from v2 on will have this key.
-> 
-> `file tree`
-> :   The value of this key is a nested directory structure that, like the `files` key in a v1 metainfo file, describes the file(s) that make up the torrent. However, the structure is more complicated. Each non-empty dictionary key represents a path component[^unixpaths] of a file. When the entire path of a file has been described in terms of nested dictionaries, there is another nested dictionary with an empty key, which in turn maps to a dictionary containing `length` and `pieces root` keys. An example will make this structure easier to grasp:
-> 
->     \todo{fix this overflow}
->     For example, if the `files` key has the value  
->     `d9:first.txtd0:d6:lengthi1e11:pieces root32:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaee9:my_folderd10:second.txtd0:d6:lengthi5e11:pieces root32:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeeee`:
-> 
->     ```bencode
->     d
->       9:first.txt
->         d
->           0:
->             d
->               6:length
->                 i1e
->               11:pieces root
->                 32:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
->             e
->         e
->       9:my_folder
->         d
->           10:second.txt
->             d
->               0:
->                 d
->                   6:length
->                     i5e
->                   11:pieces root
->                     32:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
->                 e
->             e
->         e
->     e
->     ```
-> 
->     then it is describing two files. The first is 1 byte long and will be saved to `first.txt` inside the directory that the user chooses to save the torrent to. The second is 5 bytes long and will be saved to `second.txt` in a directory named `my_folder` inside the directory that the user chooses to save the torrent to. (I have deliberately chosen to use the same file structure as the previous example.)
-> 
->     In the final level of nested dictionaries, the `length` key describes the length in bytes of the given file. The `pieces root` key is the root hash of a Merkle tree constructed from the parts of the file. See @sec-merkle-hashes for more information.
-> 
-> [^unixpaths]: Here we'd need to have an explanation of how file paths work.
-> 
-> ### Merkle trees? What? Why? {#sec-merkle-hashes}
-> 
-> At this point you may be confused. What is a Merkle tree? Why are we using them? What was wrong with storing the hash of each piece? Those are all good questions, and the answers may not be immediately clear (they definitely were not immediately clear to me).
-> 
-> #### What is a Merkle tree?
-> 
-> A Merkle tree is a tree of hashes
-> 
-> diagram here
-> 
-> #### Why?
-> 
-> reduces the amount of data in the info dict - does this matter, since we hash for ID anyway?
-> 
-> ## Hybrid torrents
-> 
-> @bep0052 also introduces the notion of a *hybrid torrent*, which can be understood both by programs that can only read v1 metainfo files and by programs that can only read v2 metainfo files. 
+\todo{flesh this out}

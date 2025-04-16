@@ -82,11 +82,11 @@ this is the only extension i remember by name and i'm writing this on a plane wi
 
 ### Other extensions
 
-## Metainfo file extensions
+## Metainfo file extensions {#sec-extensions-metainfo-file}
 
 Other extensions don't affect the peer wire protocol and thus don't need to modify the handshake.
 
-### Multitracker Metadata Extension
+### Multitracker Metadata Extension {#sec-extensions-multitracker}
 
 \todo{hook,justification,explanation,etc.}
 
@@ -94,8 +94,10 @@ This extension tells the client to ignore the `announce` key in the metainfo fil
 
 \todo{explain the tiers of trackers}
 
+### Private Trackers {#sec-extensions-private-trackers}
+
 ## Other extensions
 
-### Magnet links
+### Magnet links {#sec-extensions-magnet-links}
 
 i don't remember which kind this is
