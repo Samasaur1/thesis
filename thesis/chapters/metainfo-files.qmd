@@ -41,7 +41,9 @@ The following keys are not part of the original BitTorrent specification, and th
 :   Freeform information about the program used to create this metainfo file. Usually this consists of the program's name and version.
 
 `creation date`
-:   The Unix timestamp (number of seconds since January 1, 1970) at which this metainfo file was created
+:   The Unix timestamp (number of seconds since January 1, 1970[^unixtime]) at which this metainfo file was created
+
+[^unixtime]: This is actually not true: although i thought the entire point of Unix time was that it was a monotonically increasing timestamp that did not respect all the weird things about time, I learned while writing this that it actually *does* respect leap seconds.
 
 `encoding`
 :   The text encoding used for strings in this file. I have never seen this not be UTF-8
@@ -243,3 +245,5 @@ the actual parsing is pretty simple because i just use the bencode decoder descr
     - also any info dictionaries that aren't as compliant as the one we produce after reencoding means hashes don't match
 
 \todo{flesh this out}
+
+\todo{maybe have a "relevant extensions" section?}

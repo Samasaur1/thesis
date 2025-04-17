@@ -39,10 +39,12 @@ There are many implementations of BitTorrent out there, just as there are many e
 Here I will cite all my sources so that you can see how they will all show up:
 
 - @noauthor_codingkey_nodate
+- @noauthor_string_nodate
 - @zmuda_flight_2018
 - @gauck_implementing_2022
 - @noauthor_bittorrent_2017
 - @noauthor_flight-schoolmessagepack_2025
+- @freedman_sloppy_2003
 - @bep0003
 - @bep0005
 - @bep0006

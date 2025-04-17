@@ -1,8 +1,10 @@
 # BitTorrent Extensions {#sec-extensions}
 
-## Peer wire protocol extensions
+## Types of extensions
 
-Recall from @sec-peer-wire-protocol (specifically @sec-peer-wire-protocol-handshake) that once two peers connect, the first thing that they do is perform a *handshake*. The handshake that I used looks like this:
+### Peer wire protocol extensions
+
+Recall from @sec-peer-wire-protocol-handshake that once two peers connect, the first thing that they do is perform a *handshake*. The handshake that I used looks like this:
 
 ```hexdump
 00000000  13 42 69 74 54 6f 72 72  65 6e 74 20 50 72 6f 74  |.BitTorrent Prot|
@@ -68,7 +70,7 @@ Whenever the client connects to any peers, it would give this handshake instead,
 
 What's especially handy about this method of specifying extensions is that clients (such as mine) that don't support any extensions can simply *not read* the 8 extension bytes. In fact, my implementation literally skips over them and doesn't ever check their contents. And so long as I sent 8 zero bytes in my handshake, everything works nicely.
 
-### Two minor logistical challenges
+#### Two minor logistical challenges
 
 Inherent to how extensions are specified, each extension must use a different bit to indicate that it is supported. Once an extension is published and widely supported, this is largely not a problem. However, it could be a problem during extension development.
 
@@ -76,28 +78,78 @@ Inherent to how extensions are specified, each extension must use a different bi
 
 There are also only 64 possible extensions, simply because 8 bytes is only 64 bits.
 
-### Fast extension
+### Metainfo file extensions {#sec-extensions-metainfo-file}
 
-this is the only extension i remember by name and i'm writing this on a plane with no internet
+Other extensions don't affect the peer wire protocol and thus don't need to modify the handshake.
+
+### Extension protocol extensions
 
 ### Other extensions
 
-## Metainfo file extensions {#sec-extensions-metainfo-file}
+conventions, etc.
 
-Other extensions don't affect the peer wire protocol and thus don't need to modify the handshake.
+## List of extensions
+
+### DHT Protocol
+
+Specified in @bep0005. both a peer wire and metainfo file extension
+
+### Fast extension
+
+Specified in @bep0006. peer wire extension.
+
+### Magnet links {#sec-extensions-magnet-links}
+
+Specified in @bep0009. extension protocol extension
+
+### Extension protocol
+
+Specified in @bep0010. peer wire extension
+
+### Peer Exchange (PEX)
+
+Specified in @bep0011. extension protocol extension
 
 ### Multitracker Metadata Extension {#sec-extensions-multitracker}
 
 \todo{hook,justification,explanation,etc.}
 
+Specified in @bep0012. metainfo files extension.
+
 This extension tells the client to ignore the `announce` key in the metainfo file and read a new `announce-list` key instead. This new key holds a list of lists of tracker URLs that will be used in place of the tracker URL in the `announce` key.
 
 \todo{explain the tiers of trackers}
 
-### Private Trackers {#sec-extensions-private-trackers}
+### Local Service Discovery
 
-## Other extensions
+Specified in @bep0014. Other extension.
 
-### Magnet links {#sec-extensions-magnet-links}
+### UDP Tracker Protocol for BitTorrent
 
-i don't remember which kind this is
+Specified in @bep0015. Other extension
+
+### Superseeding
+
+### HTTP Seeding (Hoffman-style)
+
+Specified in @bep0017. metainfo files. 
+
+### HTTP/FTP Seeding (GetRight-style)
+
+Specified in @bep0019. metainfo files
+
+### Tracker returns compact peer lists
+
+Specified in @bep0023. other extension.
+
+### Tracker Returns External IP
+
+Specified in @bep0024. other extension
+
+### Private Torrents {#sec-extensions-private-torrents}
+
+Specified in @bep0027. metainfo files
+
+### Canonical Peer Priority
+
+Specified in @bep0040. Seems kinda silly to me.
