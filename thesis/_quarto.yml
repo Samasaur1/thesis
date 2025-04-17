@@ -13,16 +13,16 @@ book:
     # If the file is empty, it produces an empty chapter.
     # Therefore, we put our introduction in index.qmd
     # (it's actually a symlink to chapters/intro.qmd)
-    - checkin.qmd
     - index.qmd
     - chapters/bencode.qmd
     - chapters/metainfo-files.qmd
     - chapters/trackers.qmd
     - chapters/peer-wire-protocol.qmd
     - chapters/extensions.qmd
-    - chapters/visualization.qmd
   appendices:
     - chapters/networking-primer.qmd
+    - chapters/language-and-technology.qmd
+    - chapters/concurrency-primer.qmd
     - chapters/git-revisions.qmd
 
 bibliography: bibliography.bib
