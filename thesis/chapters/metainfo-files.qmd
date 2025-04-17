@@ -57,9 +57,7 @@ The following keys are not part of the original BitTorrent specification, and th
 :   The size, in bytes, of each piece of the torrent. Unless the total length of the torrent is a perfect multiple of this value, the final piece will be shorter.
 
 `pieces`
-:   The (SHA1) hashes of the pieces of the torrent, concatenated in order. Because each SHA1 hash is 20 bytes long, the length of this data must be 20 times the number of pieces bytes long.[^hashes]
-
-[^hashes]: \todo{explain what hashes are and why we care.}
+:   The (SHA1) hashes of the pieces of the torrent, concatenated in order. Because each SHA1 hash is 20 bytes long, the length of this data must be 20 times the number of pieces bytes long.
 
 `length` or `files`, but not both
 :   One and only one of these keys must be present (if neither or both keys are present, the metainfo file is invalid). Which key is present indicates whether the torrent described by this metainfo file will download a single file or a directory of files: if the `length` key is present, the torrent will download a single file, and the value of the key is the length (in bytes) of that file. If the `files` key is present, the torrent will download a directory of files, and the value of the key is as follows:

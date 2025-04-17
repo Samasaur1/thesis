@@ -45,6 +45,8 @@ abbrs:
 spectra:
   dictionary: |
     A list of key-value pairs, unordered unless specified otherwise. Also known as an "associative array" or "map."
+  hashes: |
+    A *hash function* is a one-way function, which means it is easy to compute the output from the input but (ideally) computationally infeasible to compute the input from the output. Hash functions take an arbitrary input (of arbitrary length) and produce a fixed-length output that is deterministic based on the input but very hard to link back to it. They are commonly used to verify that a large input is unmodified. You hash (verb) an input to produce a hash (noun).
 
 division: Mathematics and Natural Sciences
 department: Computer Science
