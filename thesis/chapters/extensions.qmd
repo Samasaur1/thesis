@@ -153,3 +153,7 @@ Specified in @bep0027. metainfo files
 ### Canonical Peer Priority
 
 Specified in @bep0040. Seems kinda silly to me.
+
+### Tracker Protocol Extension: Scrape
+
+Specified in @bep0048. other extension
