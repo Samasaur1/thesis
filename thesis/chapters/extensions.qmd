@@ -154,6 +154,6 @@ Specified in @bep0027. metainfo files
 
 Specified in @bep0040. Seems kinda silly to me.
 
-### Tracker Protocol Extension: Scrape
+### Tracker Protocol Extension: Scrape {#sec-extensions-tracker-scrape}
 
 Specified in @bep0048. other extension

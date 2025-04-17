@@ -1,96 +1,153 @@
 # Trackers {#sec-trackers}
 
+Once the metainfo file has been parsed (as described in @sec-metainfo-files), the actual downloading of the torrent begins when the client contacts a *tracker* to find peers to which it can connect.
+
 ## What are trackers / what purpose do they serve?
+
+Trackers are normal (HTTP(S)) web servers. Their main purpose is to keep lists of all clients currently participating in the swarm for a given torrent, which they use to tell clients how to find each other. They also have a secondary purpose, which is to return information about the swarm as a whole to any interested parties (described in more detail in @sec-extensions-tracker-scrape).
+
+In the original version of the BitTorrent protocol [@bep0003], trackers are the only centralized part of the protocol; without them, a client cannot find any peers and thus can never download any parts of the file. Later extensions to the protocol (described in @sec-extensions) ameliorate this weakness.
+
+\todo{I could put a section on private trackers here, but I think I can cover them in enough detail in @sec-extensions-private-torrents}
 
 ## What data is sent to/from trackers?
 
-### Request parameters
+### Request parameters {#sec-trackers-request-parameters}
 
-### Response properties/information/???
+`info_hash`
+:   The info hash (see @sec-metainfo-files-info-hash) of the torrent that the client is downloading. This value is not hex-encoded, so it must instead be URL-encoded (described below in @sec-trackers-url-encoding).
+
+    Interestingly, this means that tracker requests are per-torrent; even if the same tracker serves more than one torrent that a client wants, the client must make a separate request for each torrent. (This has no impact on functionality, just a slight impact on performance.)
+
+`peer_id`
+:   A unique identifier for this client. The specification says that peer IDs are randomly generated at the start of each download, but I generate a peer ID randomly at client startup and use that across all torrents downloaded in one session.
+
+    Peer IDs are typically not truly random. Instead, they follow one of two common formats described in @bep0020, which both serve to convey the client name and version.
+
+    The first format begins with a `-`, followed by two characters that represent the client name, followed by four characters that represent the client version, followed by another `-`. Then the remaining 12 bytes of the peer ID are randomly generated. It is up to each client how it represents its version using the four characters. For example, client XX version 1.2.3 would start its peer ID with `-XX1230-`
+
+    The second format begins with a single character to identify the client name, followed by five characters that represent the client version, followed by `---`. The remaining 11 bytes of the peer ID are randomly generated. When using this format, the five characters that represent client version each represent a different part of the client version, and if a given part becomes 10 or higher, the corresponding character overflows into the capital and then lowercase letters. Any unused characters are replaced with dashes. For example, client X version 1.2.3.45 would start its peer ID with `X123j----`.
+
+    My client combines these two forms, producing peer ID prefixes such as `-SG0100-` for SamTorrent 0.1.0 and `-SG123j-` for SamTorrent 1.2.3.45. That is, I use the form of the first format (two letter client name, four characters for version, surrounded by dashes), but I use the version encoding scheme of the second format (each part of the version is represented by one character, going from 0 to z.
+
+    Because the remaining peer ID bytes are random and not limited to URL-safe characters (random ASCII letters, numbers, and punctuation), the peer ID must also be URL-encoded (@sec-trackers-url-encoding).
+
+`ip`
+:   The IP address or DNS name where the client can be reached. This parameter is optional and most clients ignore it because a) a client's IP can be more accurately detected by looking at the source IP of the tracker request; b) of the incredible potential for denial-of-service attacks. As such, I don't set this parameter.
+
+`port`
+:   The port that the client is listening on for incoming peer connections.
+
+\todo{explain somewhere that we listen for incoming peer connections}
+
+`uploaded`
+:   The total bytes uploaded.
+
+`downloaded`
+:   The total bytes downloaded. This explicitly includes data that was downloaded and then found to be corrupt, as well as data that was downloaded twice (i.e., from two different peers at the same time).
+
+`left`
+:   The total bytes left to download.
+
+There is one other key, called `event`, which is not always present. Specifically, it's not present on the intermittent requests to the tracker, but is required for any of the "special" events:
+
+- When making the initial request to the tracker, the value of this key should be `started`
+- When shutting down gracefully, the value of this key should be `stopped`
+- When notifying the tracker that the download has completed, but that you'll continue to seed, the value of this key should be `completed`
+
+@bep0003 does say that the value of this key can be set to `empty` to have the same effect as the key not being present, although in practice this did not seem to be supported by trackers I contacted.
+
+### Response
+
+The tracker will respond with a bencoded dictionary in one of two ways.
+
+If the request is **invalid** in some way (such as if the `info_hash` corresponds to a torrent that this tracker doesn't know about), then the dictionary need only contain one key:
+
+`failure reason`
+:   A human-readable error message saying why the request failed (string). If present, no other keys are required.
+
+If the request is **valid**, then the dictionary contains the following keys instead:
+
+`interval`
+:   The time in seconds the client should wait between intermittent tracker requests (integer).
+
+`peers`
+:   A list of dictionaries containing information on how to connect to peers. Each dictionary contains the following keys:
+
+    `peer id`
+    :   The peer's peer ID (string/raw data).
+
+    `ip`
+    :   The peer's IP address (string). Technically this can be an IPv4 address, an IPv6 address, or a DNS name, but they are all strings.
+
+    `port`
+    :   The peer's port number (integer).
 
 ## Implementing tracker requests
 
-- i think the only interesting part of this is the scheduling (sleep interval between periodic requests, queue a periodic request after every start or periodic, cancel queued periodics on stop)
+### Building tracker requests
 
-***
+HTTP `GET` requests (as the tracker request is) encode their parameters in the URL itself as query parameters. For example, a request to `https://example.com` with a parameter named `key` and the value `value`, along with another parameter named `other` and the value `x`, would end up with the URL `https://example.com?key=value&other=x`. That is, the URL without parameters, followed by `?`, followed by a list of key-value pairs with the key and value separated by `=`, with each key-value pair separated by `&`.
 
-What follows is the WIP version of this chapter, in the old structure
+\todo{that explanation is iffy}
 
-> Once the torrent file has been parsed, the actual torrent download begins by contacting one or more trackers. These trackers are the only centralized part of the protocol[^magnet links], and keeps track of peers so that they can find each others. 
-> 
-> \todo{@bep0012 still wants you to only contact one tracker. check if there are other extensions that want you to contact multiple trackers at once, and otherwise remove this mention of "or more"}
-> 
-> % FIRST SENTENCE OF CHAPTER SHOULD CONNECT TO PREVIOUS CHAPTER
-> 
-> The actual torrent download begins by contacting 
-> 
-> ***
-> 
-> Once the torrent file has been parsed, the program makes an HTTP GET request to one or more trackers, as given in the `announce` field in the torrent file. The tracker is the only centralized part of the protocol^[magnet links], and when clients connect to it, it (in addition to keeping metrics) gives them a list of peers in the swarm. However, trackers can serve multiple different torrents, so we must identify the torrent we are downloading. We do this by passing the `infoHash` parameter, described earlier. To get the info hash, we take the SHA1 hash of the bencoded form of the `info` dict in the torrent file. Since we are making HTTP GET requests to the tracker, we must also URL-encode the info hash -- we **do not** simply turn it into a hex string, but URL-encode the raw data^[The official spec says that this value "will almost certainly have to be escaped" and gives no more details --- aggravating].
-> 
-> ## Request parameters
-> 
-> Tracker get requests must have the following parameters:
-> 
-> `info_hash`
-> :   As mentioned above, this is the URL-encoded SHA1 hash of the bencoded value of the `info` key of the torrent file.
-> 
-> `peer_id`
-> :   A URL-encoded 20 byte string that is a unique ID for the client. There are various styles used in BitTorrent clients. % put summary definition in first sentence
-> 
-> `port`
-> :   The port that the client is listening on. Firewalls may make this value redundant. % Expand
-> 
-> `uploaded`
-> :   The total bytes uploaded.
-> 
-> `downloaded`
-> :   The total bytes downloaded.
-> 
-> `left`
-> :   The total bytes left to download.
-> 
-> There is one other key, called `event`, which is not always present. Specifically, it's not present on the intermittent requests to the tracker, but is required for any of the "special" events:
-> 
-> - When making the initial request to the tracker, the value of this key should be `started`
-> - When shutting down gracefully, the value of this key should be `stopped`
-> - When notifying the tracker that the download has completed, but that you'll continue to seed, the value of this key should be `completed`
-> 
-> @bep0003 does say that the value of this key can be set to `empty` to have the same effect as the key not being present, although in practice this did not seem to be supported by trackers I contacted.
-> 
-> ## Tracker response
-> 
-> The tracker will respond with a bencoded dictionary with the following keys:
-> 
-> `failure reason`
-> :   A human-readable error message saying why the request failed (string). If present, no other keys may be present.
-> 
-> `interval`
-> :   The time in seconds the client should wait between intermittent tracker requests (integer).
-> 
-> `tracker id`
-> :   A string that identifies this tracker (optional). If present, update the stored tracker ID variable, and all future tracker requests should include it as a parameter. If not present, leave the stored tracker ID alone.
-> 
-> `complete`
-> :   The number of peers currently in the swarm with the entire file (integer).
-> 
-> `incomplete`
-> :   The number of peers currently in the swarm who do not have the entire file (integer).
-> 
-> `peers`
-> :   This comes in two versions: a dictionary model and a more compact binary model.
-> 
->     When using the dictionary model, this is a list of dictionaries, each with the following keys:
-> 
->     `peer id`
->     :   The peer's peer ID (string/raw data).
-> 
->     `ip`
->     :   The peer's IP address (string). Technically this can be an IPv4 address, an IPv6 address, or a DNS name, but they are all strings.
-> 
->     `port`
->     :   The peer's port number (integer).
-> 
-> 
->     When using the binary model,
->     \todo{explain binary model here}
+Therefore, a naive approach to constructing the URL for a tracker request (such as @gauck_implementing_2022) would be to take the `announce` key from the metainfo file, append a `?`, and then append the parameters in key `=` value form. This works great for `port`, `uploaded`, `downloaded`, and `left`, because these keys are always present and their values are always made up of characters allowed in URLs. The `event` key is slightly more complicated, because it is not always present, though this is fairly easily solved.
+
+The `info_hash` and `peer_id` keys are more complicated, because they cannot necessarily be represented as strings and thus cannot necessarily be put directly into URLs. To send them to the server, we instead use a method called "URL encoding" or "percent-encoding."
+
+#### URL encoding {#sec-trackers-url-encoding}
+
+URLs are allowed to consist of the following characters at any point in the URL:
+
+- any lowercase letter
+- any uppercase letter
+- any digit
+- any of the following characters: `-._~`
+
+The following characters are *reserved characters*, which means they can exist as-is in specific locations but must be escaped otherwise:
+
+- `?` (which separates the query parameters from the rest of the URL, as we saw above)
+- `:/#[]@` (each of these has a specific role, though I have omitted it because it is not relevant to this discussion)
+- `&` (which separates two consecutive key-value pairs)
+- `=` (which separates the key and value in a key-value pair)
+- `!$'()*+,;` (each of these also has a specific role which I have omitted)
+
+(You can read more about what each of these separators do at the RFC)
+
+\todo{import source}
+
+<!-- https://www.ietf.org/rfc/rfc3986.txt -->
+
+As defined in the RFC, to represent invalid characters, or reserved characters in unexpected positions, each byte is replaced with a percent sign followed by two hexadecimal digits that make up the value of that byte. For example, to transform an ASCII `A`, with a raw value of 65, that value is converted to hexadecimal (`0x41`), and then those hexadecimal digits are used to make up the percent-encoded byte, yielding `%41`. (Note that an ASCII `A` is always a valid URL character and so would not be percent-encoded.)
+
+To percent-encode an entire string, all characters that are not allowed at that point in the URL are percent-encoded. In our case, where we need only percent-encode query parameters, the only allowed characters are the characters that are always allowed, and all others must be percent-encoded.
+
+Note that just because something must be URL-encoded doesn't mean that it will necessarily be different after encoding. For example, the string `SamTorrent` is URL-encoded as `SamTorrent`, because it's already made up only of URL-safe characters. Nevertheless, we still consider this having been URL-encoded.
+
+#### Structured URL building
+
+Although we could continue the naive approach of concatenating strings, Swift provides a better way to build URL requests. We can use the provided `URLComponents` type, which allows us to start with the base URL, and then add query items as key-value pairs while letting the type insert the `?` and `&`s for us, reducing the room for typos and other errors.
+
+### Making tracker requests
+
+\todo{do i need this section at all?}
+
+short version:
+
+- we use `URLRequest`, which is built into Swift
+- `URLRequest` has an `async` method to fetch data, which we use
+- this means it must be in a `Task` to run in the background
+
+mostly the reason why i added this section in the first place is because it feels weird to talk about building the request and scheduling the request without performing the request
+
+### Scheduling tracker requests
+
+It is slightly more complicated to determine when tracker requests need to happen. Recall from @sec-trackers-request-parameters that there are four "types" of tracker request: started, intermittent, completed, and stopped.
+
+A torrent download begins with a `started` request. The response to this request will include an `interval` key, so we schedule an intermittent request to be performed `interval` seconds later.
+
+Whenever an intermittent request finishes, it too will have an `interval` key, so we schedule another intermittent request to be performed `interval` seconds later. This happens both after the first intermittent request and after every subsequent intermittent request. Without any other events occurring this process would continue forever.
+
+For the sake of example, let's say the client finishes downloading the torrent. When it does, it cancels the queued intermittent request and then performs a `completed` request. The response to this request will also include an `interval` key, which we use to schedule an intermittent request as above.
+
+When the client eventually decides to stop participating in the swarm, it cancels the queued intermittent request and then performs a `stopped` request. The response to this request will still include an `interval` key, but the client is trying to stop participating, so it ignores this key and lets the process come to a stop.
