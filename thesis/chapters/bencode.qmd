@@ -403,7 +403,7 @@ However, Swift does not (easily) support creating dictionaries whose keys are ra
 
 I described above how the index of a `KeyedContainer` is calculated by taking the distance from the final index of the fake `UnkeyedContainer` to the end of the data, and then setting the final index of the `KeyedContainer` to be that same distance from the end of the data. Originally, however, this was not the approach I took, as I instead simply set the final index of the `KeyedContainer` to the final index of the fake `UnkeyedContainer`.
 
-\todo{clearly distinguish between "final index" (aka index after all parsing is done) and "end index". actually do i need to distinguish these}
+\todo{clearly distinguish between "final index" (aka index after all parsing is done) and "end index". actually do i need to distinguish these?}
 
 However, this did not work whenever a dictionary was embedded inside some other container (a list or another dictionary). More precisely, upon setting the final index of the `KeyedContainer`, the index would "jump backward" by an (inconsistent) small number of bytes.
 
@@ -411,7 +411,12 @@ The eventual conclusion that I came to was that in all other cases where I was p
 
 ### Approach to development
 
-\todo{flesh this out}
+Because bencoding is independent of the rest of BitTorrent, I wrote this as a separate Swift package. This allowed me to develop the encoder and decoder at the same time as the rest of BitTorrent, without worrying about a shared repository or version control history.
 
-- test-driven development
-- willingness to have failing tests that i later came back and fixed
+Writing this as a standalone package also made it very easy to include end-to-end unit tests for the encoding and decoding functionality. And because I was writing tests, I could use what in my mind is the gold standard of programming, *test-driven development*.
+
+In short, test-driven development is that idea that the first thing you do for a project is to write tests. A *lot* of tests. Ideally, you write enough tests that you specify the expected behavior for all possible situations, for both valid and invalid inputs. Then, when you run the tests, they all fail, because you haven't written code yet. The genius of test-driven development is that when you write enough actual code that all your tests pass, you can be reasonably sure (depending on how comprehensive your test suite is) that your project will work in all cases. If you later think up more possible cases, write more tests! If the new tests succeed, then your implementation already handled that case properly. If the new tests fail, then you have your work cut out for you.
+
+I used test-driven development throughout the process of implementing bencode, adding more cases as I thought of them. At present, BencodeKit (my implementation) has 82 tests, all of which are passing.
+
+What isn't common for test-driven development, but what was true in this case, was my willingness to leave failing tests be for a time. This mostly applied to the corner cases described above, where I knew the behavior I wanted but struggled to make it reality. Being willing to have some tests fail temporarily let me continue working on the rest of BitTorrent without getting blocked on uncommon situations, as well as letting me come back to the problem with fresh eyes.
