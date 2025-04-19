@@ -22,7 +22,7 @@ let
     patchPhase = ''
       runHook prePatch
 
-      patchShebangs _prelims/cleanup.bash
+      patchShebangs template/prelims/cleanup.bash
 
       runHook postPatch
     '';

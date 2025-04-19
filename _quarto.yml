@@ -1,7 +1,7 @@
 project:
   type: book
-  pre-render: quarto render _prelims
-  post-render: ./_prelims/cleanup.bash
+  pre-render: quarto render template/prelims
+  post-render: ./template/prelims/cleanup.bash
 
 book:
   title: "Bit by Bit: Sam's Thesis"
@@ -30,7 +30,7 @@ bibliography: bibliography.bib
 
 filters:
   - quarto
-  - remove-appendix-part.lua
+  - template/remove-appendix-part.lua
 
 abbrs:
   TCP: Transmission Control Protocol
@@ -57,9 +57,9 @@ format:
     theme: cosmo
   pdf:
     documentclass: book
-    realdocumentclass: reedthesis
-    template: template.tex
+    realdocumentclass: template/reedthesis
+    template: template/template.tex
     template-partials:
-      - doc-class.tex
-      - biblio.tex
+      - template/doc-class.tex
+      - template/biblio.tex
     cite-method: biblatex
