@@ -1,22 +1,193 @@
 # Peer Wire Protocol {#sec-peer-wire-protocol}
 
+Once the client is told where to find peers by the tracker (@sec-trackers), it connects to some number of those peers and initiates the peer wire protocol, through which it can download the file(s) that make up the torrent.
+
 ## What is the peer wire protocol?
+
+Although the client now knows how to connect to other peers in the swarm for the torrent it wants, we still need a structured way for peers to request and send parts of the file. The peer wire protocol defines a series of messages that allow peers to tell each other what pieces of the file they have, whether they are interested in uploading or downloading, and to request and send parts of the file.
+
+\todo{I know I said the same thing twice. not sure how to reword this}
+\todo{mention that there are extensions that allow the peer wire protocol to do even more?}
+
+Importantly, it is a bidirectional protocol, which means that the connecting and receiving ends of the connection are identical to the protocol; both can send any of the valid messages at any valid time. Specifically, this means that whether client A connected to client B or client B connected to client A, once the connection begins either side can request pieces from the other.
+
+The peer wire protocol is built on top of TCP. Feel free to peruse @sec-networking-primer for more background, but the important information about TCP in this context is that it is a *reliable* protocol. A TCP connection guarantees that messages sent on top of it will be:
+
+1. received
+2. in-order
+3. uncorrupted
+
+These strengths mean that the peer wire protocol doesn't need to worry about messages being lost or corrupt.
+
+## How do we begin the peer wire protocol
+
+A peer connection begins by creating a TCP connection (including the TCP handshake). Immediately thereafter, the peer wire protocol handshake occurs over that TCP connection.
+
+### Initiating the TCP connection
+
+There are two ways in which a peer wire protocol connection begins:
+
+either:
+
+- outgoing connections based on the responses from the tracker
+- incoming connections on the socket we listen on.
+
+\todo{flesh out}
+
+i think this might be the best place to say we listen on a socket.
+
+### The peer wire protocol handshake {#sec-peer-wire-protocol-handshake}
+
+To begin a peer wire connection, both peers must send a *handshake*. This is a specific sequence of bytes that assure each peer that the other is using the same protocol, so that they can be confident that the messages they send will not be misinterpreted. The BitTorrent peer wire protocol handshake looks like this:
+
+```hexdump
+00000000  13 42 69 74 54 6f 72 72  65 6e 74 20 50 72 6f 74  |.BitTorrent Prot|
+00000010  6f 63 6f 6c 00 00 00 00  00 00 00 00 31 31 31 31  |ocol........1111|
+00000020  31 31 31 31 31 31 31 31  31 31 31 31 31 31 31 31  |1111111111111111|
+00000030  32 32 32 32 32 32 32 32  32 32 32 32 32 32 32 32  |2222222222222222|
+00000040  32 32 32 32                                       |2222|
+00000044
+```
+
+\todo{insert colored hexdump diagram here}
+\todo{update to my style of peer ID}
+
+Let's break that down. The first byte is `0x13`, which corresponds to decimal 19. This specifies the length of the subsequent ASCII string representation of the protocol name in bytes, and indeed, if we read the next 19 bytes, they are the string `BitTorrent Protocol` in ASCII. This allows other protocols to exist between peers, since they will be differentiable by name.
+
+<!-- Following the protocol name are eight extension bytes. In my implementation, as in the original specification, these are all `0x00`. Extensions to the peer wire protocol (described in further BEPs) can be assigned one of these 64 bits, and setting a given bit indicates that the corresponding extension is supported by the peer. -->
+Following the protocol name are eight extension bytes. In this example, as in the original specification, these are all `0x00`, indicating that no extensions are supported. @sec-extensions-peer-wire-protocol details how clients can indicate that they support given extensions.
+
+The next 20 bytes are the infohash of the torrent. When you're making an outgoing connection, this is simple, because you find peers by torrent, so you use that torrent's info hash^[that is, the process goes: 1) you ask the tracker "give me peers for torrent X"; 2) the tracker says "here's peer A"; 3) you connect to peer A and use the infohash for torrent X in the handshake]. However, it's a little more complicated for incoming connections. While you could technically open a new listening socket for each torrent you are downloading and send the corresponding port with each tracker request, most clients instead use a single listening socket for all torrents, wait for the incoming connection to send the infohash that they want, check whether we're actually participating in that torrent, and respond with the same infohash if so. Note that this makes it even more important to send the info hash first when making an outgoing connection.
+
+After the infohash is the peer ID, which uniquely identifies a torrent client over the course of a download.
+
+Once both peers have sent and received the handshake, they must check that the values they received are what they expected, or else they must close the connection.
+
+|     | Outgoing connections | Incoming connections |
+| --- | --- | --- |
+| Protocol | Must be `BitTorrent Protocol` | Must be `BitTorrent Protocol` |
+| Extension bytes | No restriction | No restriction |
+| Infohash | Send the infohash that they used to get the peer from the tracker, receive the same infohash back | Recieve an infohash that corresponds to a torrent they are downloading, send the same infohash back |
+| Peer ID | Receive the peer ID they got from the tracker | No restriction |
 
 ## Types of messages
 
-### The handshake
+Now that handshakes have been exchanged, the rest of the connection is an unending stream of messages.
 
-not sure i want to put this here, but it needs to go somewhere
+Each message is made up of a four-byte[^endianness] integer[^signedness] that indicates the length of the rest of the message, followed by a one-byte message type identifier, followed by the payload of the message.
+
+[^endianness]: This integer, and all subsequent integers in the protocol, are encoded in "network order" (big-endian).
+[^signedness]: It is not specified whether this or any following integers are signed or unsigned. I assumed that they were unsigned, since none of them needed to represent negative numbers, and this seemed to work for me. That said, I wouldn't hit any issues until I stored a number big enough that the most significant bit was used, since that is when signed and unsigned integers diverge (assuming two's complement notation, which is the most common format).
+
+As a special case, when the length prefix is 0, the message is a keep-alive[^keepalive], does not have a type identifier or payload, and should be ignored.
+
+[^keepalive]: A keep-alive is a message send over a connection solely to prevent that connection from being closed.
+
+There are nine message types defined in @bep0003. @sec-extensions-peer-wire-protocol details extensions which define more message types.
 
 ### choke
+
+ID
+:   0
+
+Payload
+:   None.
+
+Description
+:   This peer is now choking us. See @sec-peer-wire-protocol-choking-and-interest.
+
 ### unchoke
+
+ID
+:   1
+
+Payload
+:   None.
+
+Description
+:   This peer is no longer choking us. See @sec-peer-wire-protocol-choking-and-interest.
+
 ### interested
+
+ID
+:   2
+
+Payload
+:   None.
+
+Description
+:   This peer is now interested in us. See @sec-peer-wire-protocol-choking-and-interest.
+
 ### uninterested
+
+ID
+:   3
+
+Payload
+:   None.
+
+Description
+:   This peer is no longer interested in us. See @sec-peer-wire-protocol-choking-and-interest.
+
 ### have
+
+ID
+:   4
+
+Payload
+:   A single four-byte integer, `index`.
+
+Description
+:   This peer has acquired a new piece with index `index`.
+
 ### bitfield
+
+ID
+:   5
+
+Payload
+:   A bitfield[^bitfield] with as many bits as there are pieces in the torrent being downloaded, padded to the next byte boundary with zeros.
+
+[^bitfield]: A bitfield is a very dense data structure that represents a list of true/false values by encoding true values as `1`s and false values as `0`s. For example, the list of booleans `[true, true, false, true, false, false, false, false]` can be represented as the bitfield `0b11010000`.
+
+Description
+:   This peer has all the pieces whose indices correspond to the set bits in the bitfield. This message is only allowed as the first message after the handshake.
+
 ### request
+
+ID
+:   6
+
+Payload
+:   Three four-byte integers, `index`, `offset`, and `length`.
+
+Description
+:   This peer wants a chunk of the piece with index `index`. The chunk they are requesting is `length` bytes long and starts `offset` bytes into the piece.
+
 ### piece
+
+ID
+:   7
+
+Payload
+:   Two four-byte integers, `index` and `offset`, followed by arbitrary data of an arbitrary length.
+
+Description
+:   This peer has just sent us a chunk of the piece with index `index`, starting `offset` bytes into the piece. The arbitrary data at the end of the payload is the actual chunk of the piece.
+
+    This message is only sent in response to a `request` message that we sent to the peer.
+
 ### cancel
+
+ID
+:   8
+
+Payload
+:   Three four-byte integers, `index`, `offset`, and `length`.
+
+Description
+:   This peer is canceling a previous request that they sent us. The previous request had the same `index`, `offset`, and `length` values.
+
 
 ## Implementing the peer wire protocol
 
@@ -24,63 +195,10 @@ not sure i want to put this here, but it needs to go somewhere
 - deciding what messages to send
 - storing and stiching pieces
 
-## How do we begin the peer wire protocol
+\todo{flesh out}
 
-either:
-
-- outgoing connections based on the responses from the tracker
-- incoming connections on the socket we listen on. **TODO: i have to explain that we listen on a socket somewhere**
-
-not sure exactly where i want to put this section but i need it somewhere. I think it should go before "Implementing the peer wire protocol" so that the last section of the chapter is the one that goes into extreme depth.
-
-***
-
-What follows is the WIP version of this chapter, in the old structure
-
-> Once a connection has been established between peers, the peer wire protocol begins. This protocol allows two connected peers to share pieces of the torrent, as well as (with some extensions that I did not implement) discovering new peers, fetching metadata about other torrents, and more. 
-> 
-> 1. The handshake
-> 
-> To begin a peer wire connection, both peers must send a *handshake*. This is a specific sequence of bytes that assure each peer that the other is using the same protocol, so that they can be confident that the messages they send will not be misinterpreted. The BitTorrent peer wire protocol handshake looks like this:
-> 
-> ```hexdump
-> 00000000  13 42 69 74 54 6f 72 72  65 6e 74 20 50 72 6f 74  |.BitTorrent Prot|
-> 00000010  6f 63 6f 6c 00 00 00 00  00 00 00 00 31 31 31 31  |ocol........1111|
-> 00000020  31 31 31 31 31 31 31 31  31 31 31 31 31 31 31 31  |1111111111111111|
-> 00000030  32 32 32 32 32 32 32 32  32 32 32 32 32 32 32 32  |2222222222222222|
-> 00000040  32 32 32 32                                       |2222|
-> 00000044
-> ```
-> 
-> \todo{insert colored hexdump diagram here}
-> 
-> Let's break that down. The first byte is `0x13`, which corresponds to decimal 19. This specifies the length of the subsequent ASCII string representation of the protocol name in bytes, and indeed, if we read the next 19 bytes, they are the string `BitTorrent Protocol` in ASCII. This allows other protocols to exist between peers, since they will be differentiable by name.
-> 
-> Following the protocol name are eight extension bytes. In my implementation, as in the original specification, these are all `0x00`. Extensions to the peer wire protocol (described in further BEPs) can be assigned one of these 64 bits, and setting a given bit indicates that the corresponding extension is supported by the peer.
-> 
-> The next 20 bytes are the infohash of the torrent. When you're making an outgoing connection, this is simple, because you find peers by torrent, so you use that torrent's info hash^[that is, the process goes: 1) you ask the tracker "give me peers for torrent X"; 2) the tracker says "here's peer A"; 3) you connect to peer A and use the infohash for torrent X in the handshake]. However, it's a little more complicated for incoming connections. While you could technically open a new listening socket for each torrent you are downloading and send the corresponding port with each tracker request, most clients instead use a single listening socket for all torrents, wait for the incoming connection to send the infohash that they want, check whether we're actually participating in that torrent, and respond with the same infohash if so. Note that this makes it even more important to send the info hash first when making an outgoing connection.
-> 
-> After the infohash is the peer ID, which uniquely identifies a torrent client over the course of a download. There's a commonly used format for these peer IDs, though it isn't required.
-> 
-> \todo{explain common format}
-> 
-> 1b. Verify handshake
-> 
-> Once both peers have sent and received the handshake, they must check that the values they received are what they expected, or else they must close the connection.
-> 
-> |     | Outgoing connections | Incoming connections |
-> | --- | --- | --- |
-> | Protocol | Must be `BitTorrent Protocol` | Must be `BitTorrent Protocol` |
-> | Extension bytes | No restriction | No restriction |
-> | Infohash | Send the infohash that they used to get the peer from the tracker, receive the same infohash back | Recieve an infohash that corresponds to a torrent they are downloading, send the same infohash back |
-> | Peer ID | Receive the peer ID they got from the tracker | No restriction |
-> 
-> 2. Send bitfield (optional)
-> 
-> This is a compact way to tell the peer which pieces of the torrent you have. Under the original specification, this is only allowed at the beginning of a peer-to-peer connection, although some BEP allows it at any point.
-> 
-> \todo{find and cite which BEP}
-> 
-> ## Storing and Stitching Pieces
+> ### Storing and Stitching Pieces
 > 
 > By its inherent nature, a BitTorrent peer may get pieces of the file(s) that it is downloading out of order, and must take care to keep track of the order that they go in so that they can later be reconstructed. 
+
+### Choking and interest {#sec-peer-wire-protocol-choking-and-interest}

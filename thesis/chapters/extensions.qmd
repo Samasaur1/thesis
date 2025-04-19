@@ -2,7 +2,7 @@
 
 ## Types of extensions
 
-### Peer wire protocol extensions
+### Peer wire protocol extensions {#sec-extensions-peer-wire-protocol}
 
 Recall from @sec-peer-wire-protocol-handshake that once two peers connect, the first thing that they do is perform a *handshake*. The handshake that I used looks like this:
 
