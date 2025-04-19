@@ -187,7 +187,9 @@ At this point you may be confused. What is a Merkle tree? Why are we using them?
 
 ##### What is a Merkle tree?
 
-A Merkle tree is a tree of hashes
+A Merkle tree is a tree of hashes. Each hash is the hash of all its children concatenated.
+
+This means that a single hash (the root hash) is enough to verify whether a set of hashes that purport to be the leaf hashes are all correct.
 
 \todo{diagram here}
 
@@ -198,23 +200,120 @@ reduces the amount of data in the info dict - does this matter, since we hash fo
 - makes metainfo files smaller, since they have one merkle hash no matter how many pieces there are or how big each piece is.
 - pieces work better when small, but if pieces are small, you need a lot of them, which means a really big metainfo file/info dict without this
 
+### The difference between v1 and v2 metainfo files
+
+As we have seen, there are two main differences between v1 and v2 metainfo files: that the files are represented differently, and that piece hashes are stored differently.
+
+#### File representation
+
+\todo{I can't think of a better way to summarize this than just showing the two formats one after another. but I already use the same set of example files above, so this feels silly. I think it's probably best to just remove this whole section}
+
+Although v2 metainfo files store single-file and multi-file torrents the same way, v1 metainfo files do not, so we distinguish those.
+
+##### Single-file
+
+The following are equivalent
+
+- A v1 metainfo file with `length` equal to 10 and `name` (outside the info dictionary) equal to `file.txt`
+- A v2 metainfo file with the following value for `file tree`
+
+    ```bencode
+    d
+      8:file.txt
+        d
+          0:
+            d
+              6:length
+                i10e
+              11:pieces root
+                32:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+            e
+        e
+    e
+    ```
+
+    assuming that value for `pieces root` happens to magically be correct.
+
+##### Multi-file
+
+The following are equivalent:
+
+- A v1 metainfo files with the following value for `files`
+
+    ```bencode
+    l
+      d
+        6:length
+          i1e
+        4:path
+          l
+            9:first.txt
+          e
+      e
+      d
+        6:length
+          i5e
+        4:path
+          l
+            9:my_folder
+            10:second.txt
+          e
+      e
+    e
+    ```
+
+- A v2 metainfo file with the following value for `file tree`
+
+    ```bencode
+    d
+      9:first.txt
+        d
+          0:
+            d
+              6:length
+                i1e
+              11:pieces root
+                32:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+            e
+        e
+      9:my_folder
+        d
+          10:second.txt
+            d
+              0:
+                d
+                  6:length
+                    i5e
+                  11:pieces root
+                    32:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                e
+            e
+        e
+    e
+    ```
+
+#### Piece hashes
+
+\todo{This one might actually do well with an explanation as opposed to just a comparison of examples. can't think of a good way to do so right now though.}
+
 ### Hybrid torrents
 
-> @bep0052 also introduces the notion of a *hybrid torrent*, which can be understood both by programs that can only read v1 metainfo files and by programs that can only read v2 metainfo files. 
+To avoid the undesirable situation where a client that only supports v1 metainfo files cannot read a v2 metainfo file, or vice versa[^cantreadmetainfofile], @bep0052 also introduces the notion of a *hybrid torrent*, which can be understood both by programs that can only read v1 metainfo files and by programs that can only read v2 metainfo files.
 
-\todo{hybrid torrents}
+[^cantreadmetainfofile]: This is an especially undesirable situation because v1 and v2 metainfo files are indistinguishable to the average user, so there would be no clear reason why trying to load a metainfo file would fail.
 
-### The difference between v1 and v2 metainfo files / how to convert between them perhaps?
+Hybrid torrents simply include the necessary keys in the info dictionary for both v1 and v2 metainfo files, making sure that the different representations of files and different hash formats both correspond to the same actual files. When a v1-only or v2-only client loads a hybrid metainfo file, they simply ignore the keys for the other version and everything works perfectly.
 
-possibly switch the order of this section with the previous section
+Clients can also handle hybrid torrents specifically (mostly equivalent to supporting both v1 and v2 metainfo files separately). In this case, they must verify that hashes match both piece hash formats[^upgradingconnections].
 
-\todo{summarize diff}
+[^upgradingconnections]: A client explicitly supporting hybrid torrents can also "upgrade" a connection made using the v1 infohash to the v2 connection format, which allows for some new message types. The peer wire protocol is detailed in @sec-peer-wire-protocol.
 
 ## Info hashes {#sec-metainfo-files-info-hash}
 
 Torrents need an identifier throughout the process, and BitTorrent derives the identifier from the `info` dictionary. Specifically, the identifier is the SHA1 (v1) or SHA256 (v2) hash of the bencoded form of the info dictionary, *exactly as found in the metainfo file*. The specification notes how this "identical to bdecoding the metainfo file, extracting the info dictionary and encoding it if and only if the bdecoder fully validated the input (e.g. key ordering, absence of leading zeros)" [@bep0003]. However, this assumes that the bencode decoding process produces a dictionary containing exactly the keys found in the metainfo file, while our structured parsing approach does not make unexpected keys available (see @sec-bencode-parsing-unknown-keys for more details). So in our case, not only must we fully validate the input (which is the reason why I added configurable options to the bencode decoder to be strict when parsing), but we must either ensure that every key we decoded is reencoded when computing the info hash, or we need to compute the info hash differently.
 
 \todo{anything more to say about info hashes?}
+\todo{that is one big paragraph. break up?}
 
 ## examples
 
@@ -250,5 +349,12 @@ the actual parsing is pretty simple because i just use the bencode decoder descr
     - also any info dictionaries that aren't as compliant as the one we produce after reencoding means hashes don't match
 
 \todo{flesh this out}
+
+I haven't fleshed this out because in the process of writing this chapter I came up with a new idea
+
+- manually implement the `init(from:)` method on the `Codable` TorrentFile structs to iterate over all the keys in the decoder and reencode *then* to generate and store the info hash, thus handling even keys that I haven't specified in the struct
+- add a new `TorrentFile` struct that isn't directly `Codable` but can be constructed from `TorrentFileV1` and `TorrentFileV2`, that makes it easier to access the properties i actually care about (including standardizing file access even for single-file v1 torrents
+
+i will try this and write about whichever strategy i end up using
 
 \todo{maybe have a "relevant extensions" section?}
