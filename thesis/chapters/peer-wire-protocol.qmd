@@ -50,7 +50,6 @@ To begin a peer wire connection, both peers must send a *handshake*. This is a s
 ```
 
 \todo{insert colored hexdump diagram here}
-\todo{update to my style of peer ID}
 
 Let's break that down. The first byte is `0x13`, which corresponds to decimal 19. This specifies the length of the subsequent ASCII string representation of the protocol name in bytes, and indeed, if we read the next 19 bytes, they are the string `BitTorrent protocol` in ASCII. This allows other protocols to exist between peers, since they will be differentiable by name.
 
@@ -191,11 +190,31 @@ Description
 
 ## Implementing the peer wire protocol
 
-- listening for incoming messages
+Since the peer wire protocol is bidirectional, we want to be listening all the time, even when we are also sending messages. First, though, we must perform our handshakes.
+
+### Handshakes
+
+\todo{do I even want this? probably}
+
+### Receiving messages
+
+This is actually pretty simple. So long as the client is still participating in the swarm, we perform the following steps:
+
+1. Read the message length prefix (a four-byte big-endian unsigned integer)
+1. If the message length is 0, this is a keepalive; jump to the next iteration of the loop
+1. Read (message length) more bytes
+1. `switch` on the first byte of the remaining data
+1. Based on the message type, parse the payload
+1. Update flags/note request/save piece to disk
+
+### Sending messages
+
+All of the logic is in this part of the protcol
+
 - deciding what messages to send
 - storing and stiching pieces
 
-\todo{flesh out}
+\todo{Conveniently, I haven't implemented this yet, so I can't write about it yet}
 
 > ### Storing and Stitching Pieces
 > 
