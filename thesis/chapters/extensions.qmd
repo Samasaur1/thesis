@@ -74,21 +74,23 @@ What's especially handy about this method of specifying extensions is that clien
 
 Inherent to how extensions are specified, each extension must use a different bit to indicate that it is supported. Once an extension is published and widely supported, this is largely not a problem. However, it could be a problem during extension development.
 
-\todo{also note how @bep0003 says to coordinate with Bram Cohen}
-
 There are also only 64 possible extensions, simply because 8 bytes is only 64 bits.
 
 ### Metainfo file extensions {#sec-extensions-metainfo-file}
 
-Other extensions don't affect the peer wire protocol and thus don't need to modify the handshake.
+Other extensions modify the metainfo file. Sometimes these extensions will modify keys within the info dictionary, which may cause incompatibilities with clients that do not support the extension.
 
 ### Extension protocol extensions
 
+Some extensions use the extension protocol (described in @sec-extensions-extension-protocol) to avoid the complications of "true" peer wire extensions. Other than how they are defined and negotiated, these extensions largely behave similarly to peer wire extensions, changing how peers talk to each other.
+
 ### Other extensions
 
-conventions, etc.
+There are even more types of extensions beyond the above three. Most common are extensions that modify the behavior of trackers, but there other other extensions as well.
 
 ## List of extensions
+
+\todo{I will expand further on any extension that I actually end up implementing. Otherwise, these are deliberately just overviews.
 
 ### DHT Protocol
 
@@ -102,9 +104,53 @@ Specified in @bep0006. peer wire extension.
 
 Specified in @bep0009. extension protocol extension
 
-### Extension protocol
+### Extension protocol {#sec-extensions-extension-protocol}
 
-Specified in @bep0010. peer wire extension
+The extension protocol [@bep0010] defines a better way for peers to negotiate extensions to the original BitTorrent protocol.
+
+It is a peer wire extension, and its corresponding bit is the 21st bit from the right (`0x00 0x00 0x00 0x00 0x00 0x10 0x00 0x00`).
+
+This extension defines one new peer wire message:
+
+ID
+:   20
+
+Payload
+:   A single one-byte integer, `extended_id`, followed by arbitrary data of an arbitrary length.
+
+Description
+:   This peer is sending an extended message with ID `extended_id`. The payload of this extended message is the arbitrary data at the end of the peer wire payload.
+
+The extension protocol itself defines only one message, with ID 0. This is the extension protocol handshake. Its payload is a bencoded dictionary with one required key and a series of optional keys:
+
+`m`
+:   The single required key. The value of this key is itself a dictionary mapping names of extensions to extended message IDs for the corresponding extension message.
+
+    If a client sees an extension name that it does not recognize, it should ignore it. If a client sees an extension name that it does recognize with a value of 0, that means the peer does not support that extension. If a client sees an extension name that it recognizes with a non-zero value, that means the peer supports that extension, and wants the client to use the given value as the extended message ID for that extension when sending the extension message.
+
+    Extended message IDs cannot appear more than once, and only apply to this specific connection with this specific peer (although the peer will almost definitely use the same IDs in future connections).
+
+    Extension names should be prefixed with the same one or two-letter code that is used to identify the client that introduced the extension (that is, the letter(s) used in that client's peer ID format).
+
+`p`
+:   The local TCP port that this peer is listening on.
+
+`v`
+:   This peer's client name and version.
+
+`yourip`
+:   The IP address that this peer sees this client as.
+
+`ipv6`
+:   This peer's IPv6 address (if applicable).
+
+`ipv4`
+:   This peer's IPv4 address (if applicable).
+
+`reqq`
+:   The number of chunk requests this peer can be waiting for before it will start dropping some.
+
+The extension protocol handshake should be the first message sent after the BitTorrent handshake to any peer that supports the extension protocol^[unclear how this interacts with bitfields having to be the first message].
 
 ### Peer Exchange (PEX)
 
