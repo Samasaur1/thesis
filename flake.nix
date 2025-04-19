@@ -28,14 +28,14 @@
     in
     {
       packages = define (pkgs: {
-        thesis = pkgs.callPackage ./thesis {
+        thesis = pkgs.callPackage ./. {
           inherit rev;
           inherit (self) shortRev lastModified;
         };
       });
 
       devShells = define (pkgs: {
-        thesis = pkgs.callPackage ./thesis/shell.nix { };
+        thesis = pkgs.callPackage ./shell.nix { };
       });
 
       formatter = define (pkgs: pkgs.nixfmt-rfc-style);
