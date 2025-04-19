@@ -1,4 +1,4 @@
-# Computer Networking Primer {#sec-computer-networking-primer}
+# Computer Networking Primer {#sec-networking-primer}
 
 As interesting as computers are by themselves, they are infinitely more so when they talk to each other --- especially in the context of my thesis, which would be completely uninteresting without networking.
 
@@ -8,7 +8,7 @@ This appendix gives a basic introduction to computer networking. It is not inten
 
 ### IP
 
-### TCP
+### TCP {#sec-networking-primer-tcp}
 
 ### UDP
 

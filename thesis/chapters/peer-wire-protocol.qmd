@@ -27,6 +27,7 @@ not sure i want to put this here, but it needs to go somewhere
 ## How do we begin the peer wire protocol
 
 either:
+
 - outgoing connections based on the responses from the tracker
 - incoming connections on the socket we listen on. **TODO: i have to explain that we listen on a socket somewhere**
 

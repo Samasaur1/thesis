@@ -112,9 +112,9 @@ The following keys are not part of the original BitTorrent specification, and th
 
 ### v2 metainfo files
 
-Unless specified otherwise, all keys listed below must be present for a v1 metainfo file to be valid. Note also that these keys are those and only those defined in the original BitTorrent specification; other keys (and the specifications that define them) are detailed in @sec-extensions-metainfo-file.
+Unless specified otherwise, all keys listed below must be present for a v2 metainfo file to be valid. Note also that these keys are those and only those defined in the original BitTorrent specification; other keys (and the specifications that define them) are detailed in @sec-extensions-metainfo-file.
 
-\todo{i literally just copied and pasted that}
+\todo{i literally just copied and pasted that and changed the numbers. does it need to be different at all?}
 
 #### Top-level keys
 
@@ -189,19 +189,26 @@ At this point you may be confused. What is a Merkle tree? Why are we using them?
 
 A Merkle tree is a tree of hashes
 
-diagram here
+\todo{diagram here}
 
 ##### Why?
 
 reduces the amount of data in the info dict - does this matter, since we hash for ID anyway?
 
+- makes metainfo files smaller, since they have one merkle hash no matter how many pieces there are or how big each piece is.
+- pieces work better when small, but if pieces are small, you need a lot of them, which means a really big metainfo file/info dict without this
+
 ### Hybrid torrents
 
 > @bep0052 also introduces the notion of a *hybrid torrent*, which can be understood both by programs that can only read v1 metainfo files and by programs that can only read v2 metainfo files. 
 
+\todo{hybrid torrents}
+
 ### The difference between v1 and v2 metainfo files / how to convert between them perhaps?
 
 possibly switch the order of this section with the previous section
+
+\todo{summarize diff}
 
 ## Info hashes {#sec-metainfo-files-info-hash}
 
