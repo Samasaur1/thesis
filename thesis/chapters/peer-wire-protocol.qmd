@@ -41,18 +41,18 @@ i think this might be the best place to say we listen on a socket.
 To begin a peer wire connection, both peers must send a *handshake*. This is a specific sequence of bytes that assure each peer that the other is using the same protocol, so that they can be confident that the messages they send will not be misinterpreted. The BitTorrent peer wire protocol handshake looks like this:
 
 ```hexdump
-00000000  13 42 69 74 54 6f 72 72  65 6e 74 20 50 72 6f 74  |.BitTorrent Prot|
-00000010  6f 63 6f 6c 00 00 00 00  00 00 00 00 31 31 31 31  |ocol........1111|
-00000020  31 31 31 31 31 31 31 31  31 31 31 31 31 31 31 31  |1111111111111111|
-00000030  32 32 32 32 32 32 32 32  32 32 32 32 32 32 32 32  |2222222222222222|
-00000040  32 32 32 32                                       |2222|
+00000000  13 42 69 74 54 6f 72 72  65 6e 74 20 70 72 6f 74  |.BitTorrent prot|
+00000010  6f 63 6f 6c 00 00 00 00  00 00 00 00 68 68 68 68  |ocol........hhhh|
+00000020  68 68 68 68 68 68 68 68  68 68 68 68 68 68 68 68  |hhhhhhhhhhhhhhhh|
+00000030  2d 53 47 30 31 30 30 2d  70 70 70 70 70 70 70 70  |-SG0100-pppppppp|
+00000040  70 70 70 70                                       |pppp|
 00000044
 ```
 
 \todo{insert colored hexdump diagram here}
 \todo{update to my style of peer ID}
 
-Let's break that down. The first byte is `0x13`, which corresponds to decimal 19. This specifies the length of the subsequent ASCII string representation of the protocol name in bytes, and indeed, if we read the next 19 bytes, they are the string `BitTorrent Protocol` in ASCII. This allows other protocols to exist between peers, since they will be differentiable by name.
+Let's break that down. The first byte is `0x13`, which corresponds to decimal 19. This specifies the length of the subsequent ASCII string representation of the protocol name in bytes, and indeed, if we read the next 19 bytes, they are the string `BitTorrent protocol` in ASCII. This allows other protocols to exist between peers, since they will be differentiable by name.
 
 <!-- Following the protocol name are eight extension bytes. In my implementation, as in the original specification, these are all `0x00`. Extensions to the peer wire protocol (described in further BEPs) can be assigned one of these 64 bits, and setting a given bit indicates that the corresponding extension is supported by the peer. -->
 Following the protocol name are eight extension bytes. In this example, as in the original specification, these are all `0x00`, indicating that no extensions are supported. @sec-extensions-peer-wire-protocol details how clients can indicate that they support given extensions.
@@ -65,7 +65,7 @@ Once both peers have sent and received the handshake, they must check that the v
 
 |     | Outgoing connections | Incoming connections |
 | --- | --- | --- |
-| Protocol | Must be `BitTorrent Protocol` | Must be `BitTorrent Protocol` |
+| protocol | Must be `BitTorrent protocol` | Must be `BitTorrent protocol` |
 | Extension bytes | No restriction | No restriction |
 | Infohash | Send the infohash that they used to get the peer from the tracker, receive the same infohash back | Recieve an infohash that corresponds to a torrent they are downloading, send the same infohash back |
 | Peer ID | Receive the peer ID they got from the tracker | No restriction |

@@ -356,5 +356,3 @@ I haven't fleshed this out because in the process of writing this chapter I came
 - add a new `TorrentFile` struct that isn't directly `Codable` but can be constructed from `TorrentFileV1` and `TorrentFileV2`, that makes it easier to access the properties i actually care about (including standardizing file access even for single-file v1 torrents
 
 i will try this and write about whichever strategy i end up using
-
-\todo{maybe have a "relevant extensions" section?}

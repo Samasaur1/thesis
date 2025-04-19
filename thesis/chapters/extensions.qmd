@@ -7,19 +7,19 @@
 Recall from @sec-peer-wire-protocol-handshake that once two peers connect, the first thing that they do is perform a *handshake*. The handshake that I used looks like this:
 
 ```hexdump
-00000000  13 42 69 74 54 6f 72 72  65 6e 74 20 50 72 6f 74  |.BitTorrent Prot|
-00000010  6f 63 6f 6c 00 00 00 00  00 00 00 00 31 31 31 31  |ocol........1111|
-00000020  31 31 31 31 31 31 31 31  31 31 31 31 31 31 31 31  |1111111111111111|
-00000030  32 32 32 32 32 32 32 32  32 32 32 32 32 32 32 32  |2222222222222222|
-00000040  32 32 32 32                                       |2222|
+00000000  13 42 69 74 54 6f 72 72  65 6e 74 20 70 72 6f 74  |.BitTorrent prot|
+00000010  6f 63 6f 6c 00 00 00 00  00 00 00 00 68 68 68 68  |ocol........hhhh|
+00000020  68 68 68 68 68 68 68 68  68 68 68 68 68 68 68 68  |hhhhhhhhhhhhhhhh|
+00000030  2d 53 47 30 31 30 30 2d  70 70 70 70 70 70 70 70  |-SG0100-pppppppp|
+00000040  70 70 70 70                                       |pppp|
 00000044
 ```
 
-where the info hash of the torrent in question is `11111111111111111111` (aka `0x3131313131313131313131313131313131313131`) and our peer ID is `22222222222222222222` (aka `0x3232323232323232323232323232323232323232`).
+where the info hash of the torrent in question is `hhhhhhhhhhhhhhhhhhhh` (aka `0x6868686868686868686868686868686868686868`) and our peer ID is `-SG0100-pppppppppppp` (aka `0x2d5347303130302d707070707070707070707070`).
 
 \todo{use our real info hash in example?}
 
-The relevant part of this handshake is the eight bytes after the string `BitTorrent Protocol` that begins the handshake. These "reserved bytes" [@bep0003] are for extending the protocol. To understand how this works, let's zoom in on those 8 bytes:
+The relevant part of this handshake is the eight bytes after the string `BitTorrent protocol` that begins the handshake. These "reserved bytes" [@bep0003] are for extending the protocol. To understand how this works, let's zoom in on those 8 bytes:
 
 ```bitfield
 00000000
@@ -56,11 +56,11 @@ which would give us the following set of 8 bytes:
 and if we return to our original visualization of the handshake:
 
 ```hexdump
-00000000  13 42 69 74 54 6f 72 72  65 6e 74 20 50 72 6f 74  |.BitTorrent Prot|
-00000010  6f 63 6f 6c 01 00 00 00  00 00 00 00 31 31 31 31  |ocol........1111|
-00000020  31 31 31 31 31 31 31 31  31 31 31 31 31 31 31 31  |1111111111111111|
-00000030  32 32 32 32 32 32 32 32  32 32 32 32 32 32 32 32  |2222222222222222|
-00000040  32 32 32 32                                       |2222|
+00000000  13 42 69 74 54 6f 72 72  65 6e 74 20 70 72 6f 74  |.BitTorrent prot|
+00000010  6f 63 6f 6c 01 00 00 00  00 00 00 00 68 68 68 68  |ocol........hhhh|
+00000020  68 68 68 68 68 68 68 68  68 68 68 68 68 68 68 68  |hhhhhhhhhhhhhhhh|
+00000030  2d 53 47 30 31 30 30 2d  70 70 70 70 70 70 70 70  |-SG0100-pppppppp|
+00000040  70 70 70 70                                       |pppp|
 00000044
 ```
 
