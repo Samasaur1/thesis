@@ -17,10 +17,9 @@ Let's reference @fig-peer-wire-protocol @fig-peer-wire-protocol-first-piece @fig
 
 ## What is the peer wire protocol?
 
-Although the client now knows how to connect to other peers in the swarm for the torrent it wants, we still need a structured way for peers to request and send parts of the file. The peer wire protocol defines a series of messages that allow peers to tell each other what pieces of the file they have, whether they are interested in uploading or downloading, and to request and send parts of the file.
+Although the client now knows how to find and connect to other peers in the swarm for the torrent that it wants, peers still do not know how to understand each other.
 
-\todo{I know I said the same thing twice. not sure how to reword this}
-\todo{mention that there are extensions that allow the peer wire protocol to do even more?}
+The solution is the  peer wire protocol, which defines a series of messages that allow peers to tell each other what pieces of the file they have, whether they are interested in uploading or downloading, and to request and send parts of the file. Extensions to the protocol (@sec-extensions-peer-wire-protocol) define even more message types allowing for even more functionality.
 
 Importantly, it is a bidirectional protocol, which means that the connecting and receiving ends of the connection are identical to the protocol; both can send any of the valid messages at any valid time. Specifically, this means that whether client A connected to client B or client B connected to client A, once the connection begins either side can request pieces from the other.
 
