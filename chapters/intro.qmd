@@ -4,7 +4,16 @@ My thesis aims to provide an explanation of BitTorrent that assumes as little pr
 
 ## What is BitTorrent?
 
-BitTorrent is a protocol used to download file(s). It offers a couple advantages over traditional (HTTP-based) file downloading. The largest advantage is its *resilience*: if person A starts sharing a file and then their computer goes offline, all downloaders can still receive the entire file so long as every piece of the file exists somewhere in the network, even if no individual person has the entire file. Another advantage is reduced load on the person who originally shared the file: as the file is disseminated throughout the network, new downloaders will retrieve some pieces of the file from those who have already downloaded it and not from the person who originally shared the file.
+BitTorrent is a protocol used to download files. It offers a couple advantages over traditional file downloading:
+
+Resilience
+:   People can still download the file that they want so long as every piece of the file exists somewhere in the network, even if no individual person has the entire file. In contrast, in traditional downloading, if the server that originally shared the file goes offline, nobody else can download the file.
+
+Reduced load
+:   In traditional downloading, every person who wants the file connects to the server originally sharing the file. In contrast, in BitTorrent, as the file is disseminated throughout the network, new downloaders will retrieve some pieces of the file from those who have already downloaded it and not from the original server.
+
+Increased speed
+:   In a similar vein to reduced load, BitTorrent can (under ideal situations) improve the speed of downloads. Downloaders can retrieve pieces of the file from other people who have downloaded the file, who may be faster than the original server.
 
 ## How does BitTorrent work?
 
