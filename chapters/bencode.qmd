@@ -2,7 +2,7 @@
 
 At various points in the BitTorrent protocol, we need to translate conceptually structured information to binary data, whether it be for saving a file to disk or streaming data to the network. This is known as serialization, and the creators of BitTorrent came up with their own system, bencode. 
 
-## the protocol {#sec-bencode-the-protocol}
+## The protocol {#sec-bencode-the-protocol}
 
 Bencode supports serializing and deserializing four types:
 
@@ -30,7 +30,7 @@ Bencode supports serializing and deserializing four types:
 
     The keys must be strings. They also must be sorted by their raw data (for example, sorting `aAbB=_~` gives `=AB_ab~`).
 
-## examples
+## Examples
 
 Here's an example. Let's say we have a `Person` type, which has a first name field, a last name field, and an age field:
 
@@ -101,7 +101,7 @@ d
 e
 ```
 
-## parsing
+## Parsing
 
 Note: This section, and the rest of this chapter, are not necessary to understand either bencode or BitTorrent as a whole. In it, I go in-depth into how I implemented parsing bencode, because I find it fascinating.
 
@@ -184,7 +184,7 @@ Many types in the standard library already conform to `Codable`, such as `Int`, 
 
 [^conditionalconformance]: Conditional conformance allows a generic type to conform to a protocol if and only if its type parameter conforms to the same protocol. For example, `Array` does not conform to `Equatable`, so if I have two variables of type `Array<MyCustomClass>` I cannot check if they are equal. However, if the `Element` type parameter of the array (the type of object it holds) conforms to `Equatable`, then the array as a whole conforms to `Equatable` as well. This lets us check if two variables of type `Array<Int>` are equal, because `Int` conforms to `Equatable` and thus `Array<Int>` does as well.
 
-### my actual approach
+### My actual approach
 
 There are four "levels" of API complexity in Swift's Codable system:
 
