@@ -78,7 +78,7 @@ After the infohash is the peer ID, which uniquely identifies a torrent client ov
 Once both peers have sent and received the handshake, they must check that the values they received are what they expected, or else they must close the connection.
 
 +-----------------+--------------------------------------------------------------------+-------------------------------------------------------------------------+
-|                 | Outgoing connections                                               | Incoming connections                                                    |
+|                 | **Outgoing connections**                                           | **Incoming connections**                                                |
 +=================+====================================================================+=========================================================================+
 | protocol        | Must be `BitTorrent protocol`                                      | Must be `BitTorrent protocol`                                           |
 +-----------------+--------------------------------------------------------------------+-------------------------------------------------------------------------+
