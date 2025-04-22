@@ -207,13 +207,13 @@ Although v2 metainfo files store single-file and multi-file torrents the same wa
 
 ##### Single-file
 
-When a v1 torrent only contains a single file, its metainfo file uses the `length` key instead of the `files` key and also uses the `name` key from outside the info dictionary. The file will be saved with the name equal to the value of the `name` key, and it is `length` bytes long.
+When a v1 torrent only contains a single file, its metainfo file uses the `length` key instead of the `files` key and also uses the `name` key. The file will be saved with the name equal to the value of the `name` key, and it is `length` bytes long.
 
 In contrast, a v2 torrent will use the `file tree` key in its metainfo file even in the single-file case.
 
 As such, the following are equivalent:
 
-- A v1 metainfo file with `length` equal to 10 and `name` (outside the info dictionary) equal to `file.txt`
+- A v1 metainfo file with `length` equal to 10 and `name` equal to `file.txt`
 - A v2 metainfo file with the following value for `file tree`
 
     ```bencode
