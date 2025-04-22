@@ -451,6 +451,10 @@ $endif$
 \usepackage{todonotes}
 \setuptodonotes{inline}
 
+% https://stackoverflow.com/a/48507868/8387516
+\usepackage{fvextra}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+
 \begin{document}
 \pagestyle{empty}
 $before-body.tex()$
