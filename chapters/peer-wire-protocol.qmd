@@ -63,8 +63,10 @@ To begin a peer wire connection, both peers must send a *handshake*. This is a s
 00000044
 ```
 
-\todo{insert colored hexdump diagram here}
-\todo{explain hexdump diagram format}
+(This is a hexdump. The first column is the offset into the data (in hexadecimal). The middle section are the bytes of the data, each in hexadecimal. The last column is the ASCII representation of the data, for each byte that is a printable ASCII character.)
+
+<!-- \todo{insert colored hexdump diagram here} -->
+<!-- \todo{explain hexdump diagram format} -->
 
 Let's break that down. The first byte is `0x13`, which corresponds to decimal 19. This specifies the length of the subsequent ASCII string representation of the protocol name in bytes, and indeed, if we read the next 19 bytes, they are the string `BitTorrent protocol` in ASCII. This allows other protocols to exist between peers, since they will be differentiable by name.
 
@@ -147,9 +149,42 @@ Since the peer wire protocol is bidirectional, we want to be listening all the t
 
 ### Handshakes
 
-\todo{do I even want this? probably}
+Implementing each handshake in isolation is actually pretty simple.
 
-### Receiving messages
+For incoming handshakes, we perform the following steps in order:
+
+1. Read the first byte (the protocol length).
+1. Read that many more bytes (the protocol name). If the protocol name is not `BitTorrent protocol`, close the connection.
+1. Read the next 8 bytes to detect which extensions this peer supports (@sec-extensions-peer-wire-protocol).
+1. Read the next 20 bytes (the infohash).
+1. Read the next 20 bytes (the peer ID).
+
+Similarly, for outgoing handshakes, we perform the following steps in order:
+
+1. Write the byte 19 (the protocol length).
+1. Write the string `BitTorrent protocol` (the protocol name).
+1. Write the extension data for the extensions we support.
+1. Write the infohash of the torrent this handshake is for.
+1. Write the peer ID we are using for this connection.
+
+Where the handshakes become slightly more complicated is when composing them. I was very careful to perform the handshakes so that both incoming and outgoing connections end up in the same state after the handshakes have been performed: ready to proceed with the rest of the peer wire protocol.
+
+To achieve this, for incoming connections, we do the following:
+
+1. Read an incoming handshake.
+1. If we do not know the given infohash, close the connection.
+1. If we know the given infohash, but the torrent is not active, close the connection.
+1. Write an outgoing handshake with the same infohash and our peer ID.
+
+Similarly, for outgoing connections, we do the following:
+
+1. Write an outgoing handshake with the infohash of the torrent we want to download and our peer ID.
+1. Read an incoming handshake.
+1. If the infohash we got was not the same as the infohash we sent, close the connection.
+
+### Main loop
+
+#### Receiving messages
 
 This is actually pretty simple. So long as the client is still participating in the swarm, we perform the following steps:
 
@@ -160,17 +195,42 @@ This is actually pretty simple. So long as the client is still participating in 
 1. Based on the message type, parse the payload
 1. Update flags/note request/save piece to disk
 
-### Sending messages
+#### Sending messages
 
-All of the logic is in this part of the protcol
+This is also pretty simple. So long as the client is still participating in the swarm, we perform the following steps:
 
-- deciding what messages to send
-- storing and stiching pieces
+1. Atomically update state, computing the messages that we want to send (@sec-peer-wire-protocol-state-update)
+1. Send those messages to the peer
+1. Wait for half a second
 
-\todo{Conveniently, I haven't implemented this yet, so I can't write about it yet}
+### State updates and message computation {#sec-peer-wire-protocol-state-update}
 
-> ### Storing and Stitching Pieces
-> 
-> By its inherent nature, a BitTorrent peer may get pieces of the file(s) that it is downloading out of order, and must take care to keep track of the order that they go in so that they can later be reconstructed. 
+All of the logic is in this part of the implementation. The steps are as follows:
 
-### Choking and interest {#sec-peer-wire-protocol-choking-and-interest}
+1. Update local copy of the pieces we have from the client.
+
+    Each connection keeps a local copy of the pieces of the torrent that we have, to avoid potential deadlocks (when multiple connections are trying to write to the shared variable at the same time) and to ensure that we properly inform the peer of all new pieces that we acquire. We do so by updating the local copy and computing the difference (new pieces) from the previous stored value. For each new piece, we convert it to a `have` message telling the peer that we have this piece, and then send the message.
+
+1. Inform the peer of all new pieces other connections have acquired (as described above).
+1. If another connection has completed the piece we are working on, abandon the work we have done.
+1. If we have completed the piece we are working on, save it and tell the client that piece is complete (so that other connections will notice during their next state update).
+1. If neither we nor another connection have completed the piece we are working on, request more chunks of the piece.
+1. If either we or another connection have completed the piece we were working on, pick a new piece to work on. There are strategies to choose which piece to work on based on availability of the piece in the swarm or other factors, but we just pick randomly from the pieces that the peer has and we do not.
+1. Compute choking and interest states (see @sec-peer-wire-protocol-choking-and-interest).
+1. Send the data of the chunks that the peer has requested from us.
+
+Keep in mind that this is an atomic update, so neither the sending nor receiving loop will ever see the middle of an update.
+
+#### Choking and interest {#sec-peer-wire-protocol-choking-and-interest}
+
+BitTorrent defines a pair of flags called *choking* and *interest* to prevent network congestion and ensure fairness in peer connections.
+
+When a peer is choking us, that means that the peer will not send any chunks of the file. All outstanding requests should be considered to be canceled, and new requests will be ignored and should not be sent until the peer is no longer choking us. (Likewise, when we choke a peer, we will not share chunks of the file and can ignore requests for chunks of the file.)
+
+When a peer is interested in us, that means there is a piece we have that the peer wants to download and would download if unchoked (likewise, we should tell a peer that we are interested iff there is a piece they have that we would download). This flag should be kept up to date whether or not we are actively being choked.
+
+Connections start out choked and uninterested on both ends.
+
+@bep0003 describes a "tit-for-tat-ish" algorithm for computing choking and interest. In it, a client limits itself to four unchoked and interested connections at a time, which are supposed to be the fastest four connections it has (sorted by the rate at which the peer uploads to the client). In addition to the fastest connections, there is also an "optimistic unchoke," which is a semi-randomly selected peer that is allowed to request pieces regardless of its upload rate. This algorithm rewards those peers who share generously, while the optimistic unchoke ensures that new peers still have an opportunity to "break in" to the swarm.
+
+My implementation does not implement this algorithm. Instead, I unchoke all peers immediately and keep them unchoked all the time. I keep interest up to date based on the pieces the peer has, but otherwise my implementation is not very smart.
