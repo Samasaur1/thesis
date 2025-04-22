@@ -19,8 +19,6 @@ Trackers are normal (HTTP(S)) web servers. Their main purpose is to keep lists o
 
 In the original version of the BitTorrent protocol [@bep0003], trackers are the only centralized part of the protocol; without them, a client cannot find any peers and thus can never download any parts of the file. Later extensions to the protocol (described in @sec-extensions) ameliorate this weakness.
 
-\todo{I could put a section on private trackers here, but I think I can cover them in enough detail in @sec-extensions-private-torrents}
-
 ## What data is sent to/from trackers?
 
 Communication with trackers is made up of a series of request-response interactions. The client sends a request to the tracker when beginning a download, when stopping a download, when it has downloaded the entire torrent, and on an periodic schedule defined by the tracker. The tracker responds to requests from client, but sends no other messages.
@@ -102,15 +100,13 @@ If the request is **valid**, then the dictionary contains the following keys ins
 
 HTTP `GET` requests (like the tracker request) encode their parameters in the URL itself as query parameters. For example, a request to `https://example.com` with a parameter named `key` and the value `value`, along with another parameter named `other` and the value `x`, would end up with the URL `https://example.com?key=value&other=x`. That is, the URL without parameters, followed by `?`, followed by a list of key-value pairs with the key and value separated by `=`, with each key-value pair separated by `&`.
 
-\todo{that explanation is iffy}
-
 Therefore, a naive approach to constructing the URL for a tracker request (such as @gauck_implementing_2022) would be to take the `announce` key from the metainfo file, append a `?`, and then append the parameters in key `=` value form. This works great for `port`, `uploaded`, `downloaded`, and `left`, because these keys are always present and their values are always made up of characters allowed in URLs. The `event` key is slightly more complicated, because it is not always present, though this is fairly easily solved.
 
 The `info_hash` and `peer_id` keys are more complicated, because they cannot necessarily be represented as strings and thus cannot necessarily be put directly into URLs. To send them to the server, we instead use a method called "URL encoding" or "percent-encoding."
 
 #### URL encoding {#sec-trackers-url-encoding}
 
-URLs are allowed to consist of the following characters at any point in the URL @berners-lee_uniform_2005:
+URLs are allowed to consist of the following characters at any point in the URL, as described by @berners-lee_uniform_2005:
 
 - any lowercase letter
 - any uppercase letter
@@ -125,7 +121,7 @@ The following characters are *reserved characters*, which means they can exist a
 - `=` (which separates the key and value in a key-value pair)
 - `!$'()*+,;` (each of these also has a specific role which I have omitted)
 
-(You can read more about what each of these separators do in the specification @berners-lee_uniform_2005)
+(You can read more about what each of these separators do in the specification -@berners-lee_uniform_2005)
 
 As defined in specification, to represent invalid characters, or reserved characters in unexpected positions, each byte is replaced with a percent sign followed by two hexadecimal digits that make up the value of that byte. For example, to transform an ASCII `A`, with a raw value of 65, that value is converted to hexadecimal (`0x41`), and then those hexadecimal digits are used to make up the percent-encoded byte, yielding `%41`. (Note that an ASCII `A` is always a valid URL character and so would not be percent-encoded.)
 
