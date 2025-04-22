@@ -201,13 +201,17 @@ As we have seen, there are two main differences between v1 and v2 metainfo files
 
 #### File representation
 
-\todo{I can't think of a better way to summarize this than just showing the two formats one after another. but I already use the same set of example files above, so this feels silly. I think it's probably best to just remove this whole section}
+The difference between v1 and v2 file representation mostly comes down to how file paths are represented. While v1 stores a list of files, which each have a length and a list of path segments that make up the relative path to the file from the root of the torrent, v2 stores the files in a special data structure known as a *trie*. In effect, the list of path segments is represented by the increasingly nested keys in the trie, which allows avoiding the duplication of a common folder prefix to file paths (see @fig-metainfo-files-file-tree-trie).
 
-Although v2 metainfo files store single-file and multi-file torrents the same way, v1 metainfo files do not, so we distinguish those.
+Although v2 metainfo files store single-file and multi-file torrents the same way, v1 metainfo files do not, so we distinguish this case.
 
 ##### Single-file
 
-The following are equivalent
+When a v1 torrent only contains a single file, its metainfo file uses the `length` key instead of the `files` key and also uses the `name` key from outside the info dictionary. The file will be saved with the name equal to the value of the `name` key, and it is `length` bytes long.
+
+In contrast, a v2 torrent will use the `file tree` key in its metainfo file even in the single-file case.
+
+As such, the following are equivalent:
 
 - A v1 metainfo file with `length` equal to 10 and `name` (outside the info dictionary) equal to `file.txt`
 - A v2 metainfo file with the following value for `file tree`
@@ -231,61 +235,17 @@ The following are equivalent
 
 ##### Multi-file
 
-The following are equivalent:
+Consider the following visual representation of a `file tree` trie from a v2 metainfo file:
 
-- A v1 metainfo files with the following value for `files`
+![An example `file tree` trie](metainfo-files-file-tree-trie.tex){#fig-metainfo-files-file-tree-trie width=100%}
 
-    ```bencode
-    l
-      d
-        6:length
-          i1e
-        4:path
-          l
-            9:first.txt
-          e
-      e
-      d
-        6:length
-          i5e
-        4:path
-          l
-            9:my_folder
-            10:second.txt
-          e
-      e
-    e
-    ```
+This describes a torrent with seven files: a PDF file, and six files nested within a `chapters` folder:
 
-- A v2 metainfo file with the following value for `file tree`
+![The equivalent file layout](metainfo-files-file-layout.tex){#fig-metainfo-files-file-layout}
 
-    ```bencode
-    d
-      9:first.txt
-        d
-          0:
-            d
-              6:length
-                i1e
-              11:pieces root
-                32:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-            e
-        e
-      9:my_folder
-        d
-          10:second.txt
-            d
-              0:
-                d
-                  6:length
-                    i5e
-                  11:pieces root
-                    32:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-                e
-            e
-        e
-    e
-    ```
+We can construct the path to a given file by joining the nested keys with path separators; for the highlighted example, the resulting path is `chapters/metainfo-files.qmd`.
+
+A v1 metainfo file will have the corresponding path components as elements in a list, which must also be joined with path separators.
 
 #### Piece hashes
 
