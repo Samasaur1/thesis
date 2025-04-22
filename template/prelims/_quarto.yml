@@ -5,6 +5,9 @@ project:
     - ../../abstract.qmd
     - ../../dedication.qmd
 
+bibliography: bibliography.bib
+
 format:
   latex:
     template: template.tex
+    cite-method: biblatex
