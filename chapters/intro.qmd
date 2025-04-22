@@ -64,33 +64,25 @@ There are many implementations of BitTorrent out there, just as there are many e
 
 ## The elephant in the room: piracy
 
-\todo{I'm not totally sure that I want to talk about this, but I think that everyone's first impression of bittorrent is that it's only used for internet piracy and therefor is Bad. If I end up including this section, I'd talk about a) how bittorrent is useful for other things (archival work, evading censorship); and b) even if it weren't useful for other things, it's still interesting and worthwhile to investigate and implement}
+If you've ever heard of BitTorrent before, your impression of it is probably that it is used solely for internet piracy. Although it is not the main argument of my thesis, I will make three claims: first, that BitTorrent has important use cases other than piracy; second, even if BitTorrent were only used for piracy, that piracy is not an unconditional evil; third, even if piracy were an unconditional evil, that the BitTorrent protocol would still be an impressive technological achievement that is worth discussing.
 
-***
+Recall the three main advantages of BitTorrent: resillience, reduced load, and increased speed. These strengths are not limited to piracy, but apply to any download. Recall the last time you downloaded something very popular: perhaps an update to a video game or something else immediately after release, or a newly-released music video, or something along those lines. It likely was noticeably slower than normal, or even entirely unavailable. This type of issue is essentially unavoidable in traditional downloading, despite innovations like CDNs[^cdns] and similar technologies. Furthermore, tools like CDNs can be very expensive, especially for very large files such as academic datasets, or for open-source projects such as Linux distributions with higher budget priorities.
 
-Here I will cite all my sources so that you can see how they will all show up:
+[^cdns]: A *CDN*, or *Content Delivery Network*, replicates files on numerous computers around the world. Users downloading those files connect to the closest copy, reducing latency, increasing resilience, and distributing the load.
 
-- @noauthor_codingkey_nodate
-- @noauthor_string_nodate
-- @zmuda_flight_2018
-- @gauck_implementing_2022
-- @noauthor_bittorrent_2017
-- @noauthor_flight-schoolmessagepack_2025
-- @freedman_sloppy_2003
-- @bep0003
-- @bep0005
-- @bep0006
-- @bep0009
-- @bep0012
-- @bep0015
-- @bep0017
-- @bep0019
-- @bep0023
-- @bep0027
-- @bep0052
+It should come as no surprise, then, that all of these listed cases (video game updates, music releases, datasets, Linux installers) have used BitTorrent for distribution, along with many others. In fact, my first two successful test downloads were a dataset and a Linux installer ISO.
 
-Specifically, I'd like the BEPs (@bep0003 and below) to show up as "BEP 0003 [-@bep0003]" instead of "[@bep0003]" or "@bep0003".
+Even if BitTorrent were used solely for piracy, that is not the irredeemable evil that companies attempt to portray it as.
+The biggest justification for piracy is that companies are trying their hardest to prevent consumers from actually owning content at all. This is most prevalent with the ever-increasing push towards streaming services, be it the plethora of movie/TV streaming services, Kindle Unlimited for book "streaming," or Apple Music/Spotify/etc. for music streaming. There are numerous "streaming exclusives" that are only accessible on streaming, often only on a specific streaming service (movie/TV and book streaming services are the worse offenders of this crime). Even when there is an option to buy media, it frequently is limited to digital copies only, and no physical releases.
 
-Also note how I have @zmuda_flight_2018 and @noauthor_flight-schoolmessagepack_2025, which are a PDF and the GitHub repository that accompanies it.
+There's nothing wrong with digital copies of media in theory, but in practice there are a couple issues. First, when you buy a digital copy of something you rarely actually buy a copy. Instead, you buy a license to use the thing you bought, revocable at any time by the company you bought it from. There are countless cases of this happening to consumers, and there's nothing you can do about it. This is because (whether you buy a copy or buy a license), digital media is usually protected by *digital rights management*, or DRM. DRM prevents you from using what you "buy" the way that you want it to. For example, it prevents you from taking an ebook you bought on one e-reader and reading it on an e-reader from a different company (see @fig-steal-this-comic).
 
-You can also check to see how the full citations are rendered in the bibliography.
+![*Steal This Comic* [@munroe_steal_2008]](figures/steal_this_comic.png){#fig-steal-this-comic fig-scap='xkcd 488: *Steal This Comic*'}
+
+Furthermore, some content isn't available legally at all, even with DRM. This includes media where the master copies were damaged, movies/tv shows where the license for given songs expired and the versions on streaming services were silently changed, as well as recent cases such as the original theatrical version of *Across the Spider-Verse* not being available at all. There are also more extreme cases where no versions of media are available at all, such as nearly every video game over a decade old, as well as movies/shows (especially exclusives) taken off streaming services that go nowhere [@gibson_wonderful_2024]. In many cases, piracy is preservation.
+
+In general, history has shown that people want to do the "right" thing and get things legally...when it's reasonable to do so. We've seen this with the gradual transition from Napster to iTunes to Spotify, or with the abrupt stop of bootlegged copies of anime in the West when series were legitimately licensed. There was a period near the advent of streaming services (before the proliferation of streaming services[^socalledfreemarket]) where rates of piracy decreased drastically, but this trend is reversing and will likely continue to do so, especially as streaming services continue to crack down on "password sharing."
+
+[^socalledfreemarket]: Defenders of streaming services often claim that this is "the free market at work," but this is a fundamental misunderstanding of the situation. Music streaming services are (mostly and for the purposes of this example) a free market, because the choice between Apple Music and Spotify is not based on their catalogs --- since they have the same songs --- but based on their user experience, price, etc. That is the free market at work. Choosing between streaming services where each one is a siloed collection of licensed media is not a free market, because they aren't directly competing due to the division of content. There is a free market at work here, but it is the competition between streaming services (convenient) and piracy (free). And it's really hard to beat free.
+
+Even if BitTorrent were only used for piracy, and piracy was the worst crime one could commit, the BitTorrent protocol would still be an impressive technical achievement worth investigating. In addition to the principles of resilience, reduced load, and increased speed described above, BitTorrent makes impressive strides towards decentralization, making it easier for anyone to share files. Additionally, the protocol is fundamentally built on zero-trust principles: even in the presence of malicious actors, since the client verifies each part of the file, the worst case scenario is a waste of time and bandwidth.
