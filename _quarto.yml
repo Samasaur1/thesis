@@ -52,6 +52,8 @@ spectra:
     A list of key-value pairs, unordered unless specified otherwise. Also known as an "associative array" or "map."
   hashes: |
     A *hash function* is a one-way function, which means it is easy to compute the output from the input but (ideally) computationally infeasible to compute the input from the output. Hash functions take an arbitrary input (of arbitrary length) and produce a fixed-length output that is deterministic based on the input but very hard to link back to it. They are commonly used to verify that a large input is unmodified. You hash (verb) an input to produce a hash (noun).
+  hexadecimal: |
+    Base 16. Each digit is a power of 16 instead of a power of 10; for example, $12_{16} = 1 * 16^1 + 2 + 16^0 = 16 + 2 = 18_{10}$. Hexadecimal format is usually used to represent binary data since one byte is represented by exactly two hexadecimal digits.
 
 division: Mathematics and Natural Sciences
 department: Computer Science

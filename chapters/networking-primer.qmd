@@ -1,19 +1,5 @@
 # Computer Networking Primer {#sec-networking-primer}
 
-As interesting as computers are by themselves, they are infinitely more so when they talk to each other --- especially in the context of my thesis, which would be completely uninteresting without networking.
+Networking between computers is defined by a series of layers. For the purposes of this thesis, most of the layers are not relevant.
 
-This appendix gives a basic introduction to computer networking. It is not intended to be a comprehensive reference nor even entirely accurate; its purpose is solely to provide enough background that the rest of my thesis is understandable.
-
-## OSI Model/Internet Protocol Suite
-
-### IP
-
-### TCP {#sec-networking-primer-tcp}
-
-### UDP
-
-### HTTP
-
-## Anatomy of a web request
-
-## Anatomy of a ~~web~~ BitTorrent request
+What is relevant for us are three layers in the middle: IP, TCP, and HTTP. IP specifies how computers should find each other. TCP builds on top of IP and provides a reliable, ordered, uncorrupted stream of data. HTTP builds on top of TCP and provides methods for requesting specific paths on a different computer.

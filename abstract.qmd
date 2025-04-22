@@ -1,1 +1,1 @@
-this is my *ab*stract
+BitTorrent is a peer-to-peer file-sharing protocol that provides a number of advantages over traditional direct downloading. My thesis provides s specification-compliant implementation of the protocol, as well as a fully detailed description of the protocol.

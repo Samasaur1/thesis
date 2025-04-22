@@ -172,7 +172,7 @@ As for v1 metainfo files, the keys listed below must be present for a v2 metainf
 
     In the final level of nested dictionaries, the `length` key describes the length in bytes of the given file. The `pieces root` key is the root hash of a Merkle tree constructed from the parts of the file. See @sec-metainfo-files-merkle-trees for more information.
 
-[^unixpaths]: \todo{Here we'd need to have an explanation of how file paths work.}
+[^unixpaths]: See @sec-filesystem-primer for more information.
 
 #### Merkle trees {#sec-metainfo-files-merkle-trees}
 
