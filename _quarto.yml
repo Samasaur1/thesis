@@ -32,6 +32,8 @@ filters:
   - quarto
   - template/remove-appendix-part.lua
 
+lof: true
+lot: true
 abbrs:
   TCP: Transmission Control Protocol
   UDP: User Datagram Protocol
