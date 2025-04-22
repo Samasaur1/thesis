@@ -75,12 +75,20 @@ After the infohash is the peer ID, which uniquely identifies a torrent client ov
 
 Once both peers have sent and received the handshake, they must check that the values they received are what they expected, or else they must close the connection.
 
-|     | Outgoing connections | Incoming connections |
-| --- | --- | --- |
-| protocol | Must be `BitTorrent protocol` | Must be `BitTorrent protocol` |
-| Extension bytes | No restriction | No restriction |
-| Infohash | Send the infohash that they used to get the peer from the tracker, receive the same infohash back | Recieve an infohash that corresponds to a torrent they are downloading, send the same infohash back |
-| Peer ID | Receive the peer ID they got from the tracker | No restriction |
++-----------------+--------------------------------------------------------------------+-------------------------------------------------------------------------+
+|                 | Outgoing connections                                               | Incoming connections                                                    |
++=================+====================================================================+=========================================================================+
+| protocol        | Must be `BitTorrent protocol`                                      | Must be `BitTorrent protocol`                                           |
++-----------------+--------------------------------------------------------------------+-------------------------------------------------------------------------+
+| Extension bytes | No restriction                                                     | No restriction                                                          |
++-----------------+--------------------------------------------------------------------+-------------------------------------------------------------------------+
+| Infohash        | Send the infohash that they used to get the peer from the tracker, | Recieve an infohash that corresponds to a torrent they are downloading, |
+|                 | receive the same infohash back                                     | send the same infohash back                                             |
++-----------------+--------------------------------------------------------------------+-------------------------------------------------------------------------+
+| Peer ID         | Receive the peer ID they got from the tracker (if present)         | No restriction                                                          |
++-----------------+--------------------------------------------------------------------+-------------------------------------------------------------------------+
+
+: Handshake restrictions {#tbl-peer-wire-protocol-handshake-restrictions}
 
 ## Types of messages
 
