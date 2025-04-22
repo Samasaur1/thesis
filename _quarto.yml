@@ -28,6 +28,8 @@ book:
 
 bibliography: bibliography.bib
 # biblio-style: ieee # TODO: deal with in the future if it matters
+nocite: |
+  @*
 
 filters:
   - quarto
