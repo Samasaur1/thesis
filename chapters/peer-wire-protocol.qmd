@@ -135,6 +135,8 @@ There are nine message types defined in @bep0003. @sec-extensions-peer-wire-prot
 |        |                                                                   | same `index`, `offset`, and `length` values.                                               |
 +--------+-------------------------------------------------------------------+--------------------------------------------------------------------------------------------+
 
+: Message Types {#tbl-peer-wire-protocol-message-types}
+
 [^bitfield]: A bitfield is a very dense data structure that represents a list of true/false values by encoding true values as `1`s and false values as `0`s. For example, the list of booleans `[true, true, false, true, false, false, false, false]` can be represented as the bitfield `0b11010000`.
 
 ## Implementing the peer wire protocol
