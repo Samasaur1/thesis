@@ -107,7 +107,7 @@ The following keys are not part of the original BitTorrent specification, and th
 
 <!-- https://github.com/poeml/mirrorbrain/blob/76f2909e33004a7f5e0dd52b816881eb9fbd4246/mod_mirrorbrain/mod_mirrorbrain.c#L3273-L3294 -->
 
-\todo{cite MirrorBrain source code?}
+<!-- \todo{cite MirrorBrain source code?} -->
 
 ### v2 metainfo files
 
@@ -174,26 +174,13 @@ As for v1 metainfo files, the keys listed below must be present for a v2 metainf
 
 [^unixpaths]: \todo{Here we'd need to have an explanation of how file paths work.}
 
-#### Merkle trees? what? why? {#sec-metainfo-files-merkle-trees}
+#### Merkle trees {#sec-metainfo-files-merkle-trees}
 
-At this point you may be confused. What is a Merkle tree? Why are we using them? What was wrong with storing the hash of each piece? Those are all good questions, and the answers may not be immediately clear (they definitely were not immediately clear to me).
+A Merkle tree is a tree of hashes. Each hash is the hash of all its children concatenated. This means that a single hash (the root hash) is enough to verify whether a set of hashes that purport to be the leaf hashes are all correct.
 
-\todo{merkle trees}
+Using a Merkle tree for piece hashes allows keeping piece sizes small without making the metainfo file too big (since the metainfo file only contains the root Merkle hash no matter how many pieces there are). Keeping piece sizes small allows the peer wire protocol (@sec-peer-wire-protocol) to work better.[^smallpiecesizes]
 
-##### What is a Merkle tree?
-
-A Merkle tree is a tree of hashes. Each hash is the hash of all its children concatenated.
-
-This means that a single hash (the root hash) is enough to verify whether a set of hashes that purport to be the leaf hashes are all correct.
-
-\todo{diagram here}
-
-##### Why?
-
-reduces the amount of data in the info dict - does this matter, since we hash for ID anyway?
-
-- makes metainfo files smaller, since they have one merkle hash no matter how many pieces there are or how big each piece is.
-- pieces work better when small, but if pieces are small, you need a lot of them, which means a really big metainfo file/info dict without this
+[^smallpiecesizes]: This is because pieces can be shared, saved, and verified with more granularity.
 
 ### The difference between v1 and v2 metainfo files
 
@@ -249,7 +236,7 @@ A v1 metainfo file will have the corresponding path components as elements in a 
 
 #### Piece hashes
 
-\todo{This one might actually do well with an explanation as opposed to just a comparison of examples. can't think of a good way to do so right now though.}
+In v2 metainfo files, rather than storing the hash of each piece, the root hash of a Merkle tree is stored, and peers must acquire intermediate hashes in the tree from each other. Other than how the hashes are stored in the metainfo file, the hashing process is nearly identical: the only differences are that SHA256 is used instead of SHA1, and piece hashes are aligned to file boundaries.
 
 ### Hybrid torrents
 
@@ -266,9 +253,6 @@ Clients can also handle hybrid torrents specifically (mostly equivalent to suppo
 ## Info hashes {#sec-metainfo-files-info-hash}
 
 Torrents need an identifier throughout the process, and BitTorrent derives the identifier from the `info` dictionary. Specifically, the identifier is the SHA1 (v1) or SHA256 (v2) hash of the bencoded form of the info dictionary, *exactly as found in the metainfo file*. The specification notes how this "identical to bdecoding the metainfo file, extracting the info dictionary and encoding it if and only if the bdecoder fully validated the input (e.g. key ordering, absence of leading zeros)" [@bep0003]. However, this assumes that the bencode decoding process produces a dictionary containing exactly the keys found in the metainfo file, while our structured parsing approach does not make unexpected keys available (see @sec-bencode-parsing-unknown-keys for more details). So in our case, not only must we fully validate the input (which is the reason why I added configurable options to the bencode decoder to be strict when parsing), but we must either ensure that every key we decoded is reencoded when computing the info hash, or we need to compute the info hash differently.
-
-\todo{anything more to say about info hashes?}
-\todo{that is one big paragraph. break up?}
 
 ## Examples
 
@@ -295,19 +279,14 @@ e
 
 ## Parsing
 
-the actual parsing is pretty simple because i just use the bencode decoder described in @sec-bencode.
+The actual parsing is pretty simple, because I just use the bencode decoder described in @sec-bencode.
 
-- talk about my attempts to parse/use hybrid torrents
-- talk about how info hashes don't match up if there are any extra keys in the info dictionary
-    - talk about the two approaches of 1) decoder and reencode (cite the spec recommending against this) vs 2) take substring of metainfo file
-    - since we do (1) we need to make sure that we reencode all keys that we decoded, not just the keys that we expect
-    - also any info dictionaries that aren't as compliant as the one we produce after reencoding means hashes don't match
+I simply created a type mirroring the structure of the metainfo file, and then was able to directly decode it. To compute the infohash, I then reencode the info dictionary and hash that data.
 
-\todo{flesh this out}
+The specification recommends against this, and indeed I ran into issues doing so. If metainfo files had any keys that I didn't specify in the type, they would be discarded by the decoder and thus not reencoded, producing a different infohash.
 
-I haven't fleshed this out because in the process of writing this chapter I came up with a new idea
+To resolve this issue, I set the decoder option to error on unknown keys, and added all keys that I saw to the type as optional keys. This did fix the actual problems I was encountering, but it is not a robust solution.
 
-- manually implement the `init(from:)` method on the `Codable` TorrentFile structs to iterate over all the keys in the decoder and reencode *then* to generate and store the info hash, thus handling even keys that I haven't specified in the struct
-- add a new `TorrentFile` struct that isn't directly `Codable` but can be constructed from `TorrentFileV1` and `TorrentFileV2`, that makes it easier to access the properties i actually care about (including standardizing file access even for single-file v1 torrents
+I later came up with another potential solution that I have not yet had the opportunity to try. Instead of decoding and reencoding using the synthesized `Codable` conformance, I could manually implement the `init(from:)` method on the type to iterate over all the keys in the decoder and reencode *then* to generate and store the info hash, thus handling even keys that I haven't specified in the type itself.
 
-i will try this and write about whichever strategy i end up using
+Either way, I also plan to add a new type that isn't directly `Codable` but can be constructed from the `Codable` types, that makes it easier to access the properties i actually care about (including standardizing file access even for single-file v1 torrents).
