@@ -105,8 +105,6 @@ e
 
 Note: This section, and the rest of this chapter, are not necessary to understand either bencode or BitTorrent as a whole. In it, I go in-depth into how I implemented parsing bencode, because I find it fascinating.
 
-\todo{check the wording of this with erica}
-
 ### Single-pass parsing {#sec-bencode-single-pass-parsing}
 
 Bencode was pretty clearly designed to be easy to parse in a single pass, in which it is successful. @gauck_implementing_2022 takes this approach, which boils down to:
