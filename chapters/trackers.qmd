@@ -2,6 +2,17 @@
 
 Once the metainfo file has been parsed (as described in @sec-metainfo-files), the actual downloading of the torrent begins when the client contacts a *tracker* to find peers to which it can connect.
 
+::: {#fig-trackers layout-ncol=3}
+
+![We connect to the tracker](trackers-figure-1.tex){#fig-trackers-connect-to-tracker width=90%}
+
+![We receive peer addresses](trackers-figure-2.tex){#fig-trackers-tracker-response width=90%}
+
+![We can now connect to the peers](trackers-figure-3.tex){#fig-trackers-found-peers width=90%}
+
+Talking to a tracker to locate peers
+:::
+
 ## What are trackers / what purpose do they serve?
 
 Trackers are normal (HTTP(S)) web servers. Their main purpose is to keep lists of all clients currently participating in the swarm for a given torrent, which they use to tell clients how to find each other. They also have a secondary purpose, which is to return information about the swarm as a whole to any interested parties (described in more detail in @sec-extensions-tracker-scrape).
