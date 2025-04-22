@@ -36,9 +36,7 @@ In the original version of the BitTorrent protocol [@bep0003], trackers are the 
 :   The IP address or DNS name where the client can be reached. This parameter is optional and most clients ignore it because a) a client's IP can be more accurately detected by looking at the source IP of the tracker request; b) of the incredible potential for denial-of-service attacks. As such, I don't set this parameter.
 
 `port`
-:   The port that the client is listening on for incoming peer connections.
-
-\todo{explain somewhere that we listen for incoming peer connections}
+:   The port that the client is listening on for incoming peer connections (see @sec-peer-wire-protocol-listening-socket)
 
 `uploaded`
 :   The total bytes uploaded.

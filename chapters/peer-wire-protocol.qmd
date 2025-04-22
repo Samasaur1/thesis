@@ -27,14 +27,18 @@ A peer connection begins by creating a TCP connection (including the TCP handsha
 
 There are two ways in which a peer wire protocol connection begins:
 
-either:
+#### Outgoing connections to peers listed in the responses from the tracker
 
-- outgoing connections based on the responses from the tracker
-- incoming connections on the socket we listen on.
+Upon each tracker response, the client gets a list of peers and how to connect to them. It then takes some of the peers from the list and attempts to connect to them. Many of these connection attempts will fail, most likely due to firewalls beyond the peer's control, but those that succeed proceed to the next step (@sec-peer-wire-protocol-handshake).
 
-\todo{flesh out}
+#### Incoming connections on the socket the client listens on {#sec-peer-wire-protocol-listening-socket}
 
-i think this might be the best place to say we listen on a socket.
+If our client can connect to peers, then it stands to reason (because BitTorrent is bidirectional) that peers can connect to us. 
+Indeed, this is the case. For each torrent that it is downloading, a client must be listening for incoming TCP connections on a port. It reports that port to the tracker that it contacts, which allows other peers to connect to it.
+
+Although a client *can* listen on a different port for each torrent that it downloads, it does not need to do so. Instead, a client can listen on a single port across all the torrents it is downloading, and identify which torrent incoming connections are for based on the BitTorrent handshake that is read next (@sec-peer-wire-protocol-handshake).
+
+Note also that in most cases, clients will be run behind a firewall, which blocks incoming connections before they even reach the computer the client is running on. While this doesn't break the protocol if a single peer is unreachable, if *all* peers were unreachable no connections could ever be made. Therefore, for the health of the swarm it is important that at least some peers not be behind a firewall (due to how BitTorrent works, so long as at least one peer is reachable, all peer will *eventually* get the entire file, as they "coordinate" via the one reachable node).
 
 ### The peer wire protocol handshake {#sec-peer-wire-protocol-handshake}
 
