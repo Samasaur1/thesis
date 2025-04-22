@@ -92,7 +92,7 @@ There are even more types of extensions beyond the above three. Most common are 
 
 \todo{I will expand further on any extension that I actually end up implementing. Otherwise, these are deliberately just overviews.
 
-### DHT Protocol
+### DHT Protocol {#sec-extensions-dht}
 
 Specified in @bep0005. both a peer wire and metainfo file extension
 
@@ -176,11 +176,11 @@ Specified in @bep0015. Other extension
 
 ### Superseeding
 
-### HTTP Seeding (Hoffman-style)
+### HTTP Seeding (Hoffman-style) {#sec-extensions-http-hoffman}
 
 Specified in @bep0017. metainfo files. 
 
-### HTTP/FTP Seeding (GetRight-style)
+### HTTP/FTP Seeding (GetRight-style) {#sec-extensions-http-getright}
 
 Specified in @bep0019. metainfo files
 
