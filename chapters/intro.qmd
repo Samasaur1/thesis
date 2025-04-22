@@ -30,12 +30,12 @@ If Bob then wants to download Alice's file (`sams-thesis.pdf`), he performs the 
 
 1. He begins by acquiring[^getmetainfofiles] the metainfo file Alice generated (`sams-thesis.pdf.torrent`).
 1. He opens it in his BitTorrent client.
-1. Bob's client parses the metainfo file and connects to the *tracker* listed in the file.
+1. Bob's client parses the metainfo file and connects to the *tracker* listed in the file (@fig-intro-bittorrent-process-overview-tracker).
 
     The tracker (described in detail in @sec-trackers) gives Bob's client a list of *peers*, other people in the network who are uploading and/or downloading the same file, and their IP addresses.
     (Since Bob is the first person to try to download `sams-thesis.pdf`, Alice is the only peer.)
 
-1. Bob's client then connects to some of these peers (in this case, only to Alice) and begins the *peer wire protocol* with each of them (see @sec-peer-wire-protocol).
+1. Bob's client then connects to some of these peers (in this case, only to Alice) and begins the *peer wire protocol* with each of them (@fig-intro-bittorrent-process-overview-peers, see also @sec-peer-wire-protocol).
 
     The peer wire protocol defines how Bob's client can request and receive pieces of `sams-thesis.pdf` from Alice, which it does automatically.
     As Bob's client receives pieces of `sams-thesis.pdf`, it verifies that they are correct (uncorrupted and untampered-with) against information stored in `sams-thesis.pdf.torrent`[^verification], and once it has all the pieces of `sams-thesis.pdf`, it checks that the file as a whole is correct.
@@ -47,7 +47,14 @@ Bob has now successfully downloaded a file using BitTorrent!
 
 Crucially, at this point Alice and Bob are entirely equal in the eyes of BitTorrent. It doesn't matter that Alice was the one to originally share the file, and if Alice turned off her computer and Charlie wanted to download the file, he could get the entire file from Bob so long as Bob's computer remains online.
 
-\todo{add diagrams}
+::: {#fig-intro-bittorrent-process-overview layout-ncol=2}
+
+![We talk to the tracker to find peers](figures/intro-bittorrent-process-overview-tracker.tex){#fig-intro-bittorrent-process-overview-tracker}
+
+![We talk to peers to get the actual file](figures/intro-bittorrent-process-overview-peers.tex){#fig-intro-bittorrent-process-overview-peers}
+
+An overview of the BitTorrent process
+:::
 
 ## What did I produce?
 
