@@ -23,15 +23,11 @@ These strengths mean that the peer wire protocol doesn't need to worry about mes
 
 A peer connection begins by creating a TCP connection (including the TCP handshake). Immediately thereafter, the peer wire protocol handshake occurs over that TCP connection.
 
-### Initiating the TCP connection
+### Initiating the TCP connection {#sec-peer-wire-protocol-listening-socket}
 
-There are two ways in which a peer wire protocol connection begins:
-
-#### Outgoing connections to peers listed in the responses from the tracker
+There are two ways in which a peer wire protocol connection begins: outgoing connections to peers listed in the responses from the tracker, and incoming connections on the socket the client listens on.
 
 Upon each tracker response, the client gets a list of peers and how to connect to them. It then takes some of the peers from the list and attempts to connect to them. Many of these connection attempts will fail, most likely due to firewalls beyond the peer's control, but those that succeed proceed to the next step (@sec-peer-wire-protocol-handshake).
-
-#### Incoming connections on the socket the client listens on {#sec-peer-wire-protocol-listening-socket}
 
 If our client can connect to peers, then it stands to reason (because BitTorrent is bidirectional) that peers can connect to us. 
 Indeed, this is the case. For each torrent that it is downloading, a client must be listening for incoming TCP connections on a port. It reports that port to the tracker that it contacts, which allows other peers to connect to it.
