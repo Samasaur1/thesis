@@ -320,6 +320,8 @@ $if(pagestyle)$
 $endif$
 $pandoc.tex()$
 
+\usetikzlibrary{positioning,calc,arrows,shapes}
+
 $if(lang)$
 \ifLuaTeX
 \usepackage[bidi=basic]{babel}
