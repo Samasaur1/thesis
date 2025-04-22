@@ -158,7 +158,9 @@ However, we don't really want to parse into dictionaries. This is because we kno
 
     print("\(obj.firstName) \(obj.lastName) is \(age) years old")
     ```
-- *are* there other advantages or am i making this up? \todo{come back to this}
+- **Fail early, fail fast, fail verbosely.** Checking for the presence of keys and that they are of the correct type inside the decoding process itself means that attempting to decode invalid or partial data will fail at the time that decoding is attempted, rather than at the time of use. This also prevents code from using a property that wasn't missing even when some other properties are missing --- acting based on such an inconsistent state is almost never desirable.
+
+    Additionally, the errors generated from invalid data know much more about the context in which they occurred, which can be conveyed to the calling code. This can be extremely helpful when trying to track down why some data does not parse in an expected way.
 
 We could do a single parsing pass to end up with a dictionary and then manually convert to a typed object. While this is an improvement, it still has its downsides:
 
@@ -280,8 +282,15 @@ Encoding is actually pretty easy. Here's how we handle the three types of contai
 :   Although this is more complicated, it's actually not too bad. The container can contain any kind of container, but the nice thing is that we don't actually care: we can just ask each container for the data it produces after encoding and use that. That makes the entire implementation: encode an ASCII `"l"`, then append the data for each nested container in order, then encode an ASCII `"e"`.
 
 `KeyedContainer`
-:   This is again more complex but still okay. While the values can be any kind of container (like in `UnkeyedContainer`s), the keys must be strings. Also recall from @sec-bencode-the-protocol that the key-value pairs must be sorted by the keys. In full: encode an ASCII `"d"`, then for each key-value pair in sorted order, create a `SingleValueContainer`, encode the key into it, and append the data, then append the data for the value container, then encode an ASCII `"e"`.
-\todo{pseudocode? this sentence sucks}
+:   This is again more complex but still okay. While the values can be any kind of container (like in `UnkeyedContainer`s), the keys must be strings. Also recall from @sec-bencode-the-protocol that the key-value pairs must be sorted by the keys. The whole process is thus:
+
+    1. Encode an ASCII `"d"`
+    1. For each key-value pair in sorted order:
+        1. Create a `SingleValueContainer`
+        1. Encode the key into the `SingleValueContainer`
+        1. Append the data of the `SingleValueContainer` to the `KeyedContainer`
+        1. Append the data of the value container to the `KeyedContainer`
+    1. Encode an ASCII `"e"`
 
 Decoding is much more complicated, because we aren't just producing data. Instead we are essentially passing around a big chunk of data and maintaining a bunch of indices into it, because when some type asks to decode an `UnkeyedContainer`, for example, your decoder needs to know the slice of data that container refers to. This means reading in sequence (essentially doing all the necessary work), and then when you're done parsing and finally know where the container ends, you give it back as a sub-chunk of data (essentially saying "here's the container you wanted, but I don't know what's in it") even though you just parsed the whole thing. Going through the three container types again:
 
@@ -331,19 +340,21 @@ The approach described in @sec-bencode-single-pass-parsing will always parse and
 There are three options for how to handle this:
 
 Accept unknown keys
-:   This is appealing because it doesn't introduce any more errors; that is, it wouldn't reject any valid bencode because of unexpected keys. Additionally, the `JSONDecoder` provided by Swift accepts extra keys, so we'd be matching the typical behavior of decoders. However, due to how Swift's `Codable` system works, the parsed keys cannot be accessed despite being properly parsed, which may be unexpected and not desired.
+:   Allow extra keys to be present without causing errors. Due to how Swift's `Codable` system works, the values of the given keys will not be accessible.
 
 Reject unknown keys
-:   Although this does introduce errors where there otherwise were none, it means that we always know that we got exactly the data that we were expecting.
-
-\todo{i'm not sure i like the wording of either of the above}
+:   Upon seeing any key that does not match a key in the type being decoded, throw an error.
 
 Configurable on a case-by-case basis
-:   This achieves the best of both worlds since the behavior can be configured by the user at the decoding site. It allows enforcing that no extra keys are present when the situation requires it (such as @sec-metainfo-files-info-hash). Of course, we still need to define a default behavior. I went with accepting unknown keys to match `JSONDecoder` and work in more situations, although I set the option to error on unknown keys in most places where I use the decoder.
+:   Expose a configurable option on `BencodeDecoder` that controls the behavior upon seeing an unexpected key. This lets end users decide at the time of usage whether they want to be permissive and allow extra keys, or whether they want to be strict and error on extra keys.
 
-\todo{better join?}
+The advantage of allowing extra keys is that it doesn't introduce any errors where there would otherwise be none; that is, it wouldn't reject any valid bencode because of extra keys. Additionally, the `JSONDecoder` provided by Swift accepts extra keys, so we'd be matching the typical behavior of decoders.
 
-Implementation details:
+On the other hand, rejecting extra keys gives the user a guarantee that the data they're parsing is exactly of the format they're expecting. It also means that reencoding the newly-decoded object should produce exactly the same data it was originally decoded from, because there are no keys that were decoded and then silently ignored.
+
+Because both accepting and rejecting unknown keys have their advantages at times, I decided to make the behavior configurable at the decoding site. This allows enforcing that no extra keys are present when the situation requires it (such as @sec-metainfo-files-info-hash). For the default value of this configurable option, I chose to accept unknown keys, primarily to match the behavior of Swift's existing `JSONDecoder`. However, in most cases where I use a bencode decoder in my own code I set the option to error on unknown keys.
+
+Since I am allowing the user to choose between these behaviors, I needed to implement both of them, which means understanding how `KeyedContainer`s and their keys are related.
 
 `KeyedContainer` is actually a generic type with a type parameter `Key` that conforms to `CodingKey`. `CodingKey` is "\[a\] type that can be used as a key for encoding and decoding" (@noauthor_codingkey_nodate). It's typically implemented as an `enum` with a raw value of type `String`, but technically anything convertible to a string can be used. `CodingKey` implementations are usually also synthesized, but you need to specify them yourself when a property name on your type is not in the same format as in the encoded representation. For example, the following struct will parse an encoded key `"the_property"` and assign it to `theProperty`.
 ```swift
@@ -399,8 +410,6 @@ However, Swift does not (easily) support creating dictionaries whose keys are ra
 #### Calculating the end index of `KeyedContainer`s
 
 I described above how the index of a `KeyedContainer` is calculated by taking the distance from the final index of the fake `UnkeyedContainer` to the end of the data, and then setting the final index of the `KeyedContainer` to be that same distance from the end of the data. Originally, however, this was not the approach I took, as I instead simply set the final index of the `KeyedContainer` to the final index of the fake `UnkeyedContainer`.
-
-\todo{clearly distinguish between "final index" (aka index after all parsing is done) and "end index". actually do i need to distinguish these?}
 
 However, this did not work whenever a dictionary was embedded inside some other container (a list or another dictionary). More precisely, upon setting the final index of the `KeyedContainer`, the index would "jump backward" by an (inconsistent) small number of bytes.
 
