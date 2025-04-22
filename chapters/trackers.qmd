@@ -77,6 +77,8 @@ If the request is **valid**, then the dictionary contains the following keys ins
     `peer id`
     :   The peer's peer ID (string/raw data).
 
+        Note that although this it required by the original specification, many trackers will omit the peer ID. Therefore, in order to work with more torrents, my implementation treats this as an optional key.
+
     `ip`
     :   The peer's IP address (string). Technically this can be an IPv4 address, an IPv6 address, or a DNS name, but they are all strings.
 
