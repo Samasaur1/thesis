@@ -112,14 +112,14 @@ It is a peer wire extension, and its corresponding bit is the 21st bit from the 
 
 This extension defines one new peer wire message:
 
-ID
-:   20
++--------+-------------------------------------------------------------------+--------------------------------------------------------------------------------------------+
+| **ID** | **Payload**                                                       | **Description**                                                                            |
++========+===================================================================+============================================================================================+
+| 20     | A single one-byte integer, `extended_id`, followed by             | This peer is sending an extended message with ID `extended_id`. The payload of this        |
+|        | arbitrary data of an arbitrary length.                            | extended message is the arbitrary data at the end of the peer wire payload.                |
++--------+-------------------------------------------------------------------+--------------------------------------------------------------------------------------------+
 
-Payload
-:   A single one-byte integer, `extended_id`, followed by arbitrary data of an arbitrary length.
-
-Description
-:   This peer is sending an extended message with ID `extended_id`. The payload of this extended message is the arbitrary data at the end of the peer wire payload.
+: Message types defined by the extension protocol {#tbl-extensions-extension-protocol-message-types}
 
 The extension protocol itself defines only one message, with ID 0. This is the extension protocol handshake. Its payload is a bencoded dictionary with one required key and a series of optional keys:
 
