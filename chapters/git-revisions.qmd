@@ -1,16 +1,17 @@
 # Git revisions
 
 This document was last updated on \commitDate.  
-This corresponds to \commitRev.
 
 The revisions of the code I wrote are as follows:
 
-BencodeKit
+[BencodeKit](https://github.com/Samasaur1/BencodeKit)
+:   [`0de14d20bb378489fca7846943ac5ebff31ee810`](https://github.com/Samasaur1/BencodeKit/tree/0de14d20bb378489fca7846943ac5ebff31ee810)
 
-:   000000
+[TorrentFileKit](https://github.com/Samasaur1/TorrentFileKit)
+:   [`52e972e3dd1bdb1116d2f660ab0c3568b775a5de`](https://github.com/Samasaur1/TorrentFileKit/tree/52e972e3dd1bdb1116d2f660ab0c3568b775a5de)
 
-TorrentFileKit
+[SamTorrent](https://github.com/Samasaur1/SamTorrent)
+:   [`9e8698410cf6d25295c3b338328039eacee9bca5`](https://github.com/Samasaur1/SamTorrent/tree/9e8698410cf6d25295c3b338328039eacee9bca5)
 
-:   000000
-
-(etc.)
+[{{< meta title >}}](https://github.com/Samasaur1/thesis)
+:   [`{{< meta commitRev >}}`](https://github.com/Samasaur1/thesis/tree/{{< meta commitRev >}})
