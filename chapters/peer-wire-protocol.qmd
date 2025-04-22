@@ -2,6 +2,19 @@
 
 Once the client is told where to find peers by the tracker (@sec-trackers), it connects to some number of those peers and initiates the peer wire protocol, through which it can download the file(s) that make up the torrent.
 
+::: {#fig-peer-wire-protocol layout-ncol=3}
+
+![We get our first piece](peer-wire-protocol-figure-1.tex){#fig-peer-wire-protocol-first-piece width=90%}
+
+![We start sharing pieces](peer-wire-protocol-figure-2.tex){#fig-peer-wire-protocol-more-pieces width=90%}
+
+![We complete the file](peer-wire-protocol-figure-3.tex){#fig-peer-wire-protocol-complete width=90%}
+
+A typical BitTorrent download
+:::
+
+Let's reference @fig-peer-wire-protocol @fig-peer-wire-protocol-first-piece @fig-peer-wire-protocol-more-pieces @fig-peer-wire-protocol-complete
+
 ## What is the peer wire protocol?
 
 Although the client now knows how to connect to other peers in the swarm for the torrent it wants, we still need a structured way for peers to request and send parts of the file. The peer wire protocol defines a series of messages that allow peers to tell each other what pieces of the file they have, whether they are interested in uploading or downloading, and to request and send parts of the file.
