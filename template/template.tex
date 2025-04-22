@@ -452,6 +452,7 @@ $endif$
 \setuptodonotes{inline}
 
 \begin{document}
+\pagestyle{empty}
 $before-body.tex()$
 
 $for(include-before)$
@@ -477,7 +478,6 @@ $if(abbrs)$
 $endif$
 
 $toc.tex()$
-\todo{should this have a header?}
 
 % Only add a list of spectra if there are any abbreviations
 $if(spectra)$
@@ -507,6 +507,7 @@ $endif$
 $if(has-frontmatter)$
 \mainmatter
 $endif$
+\pagestyle{fancy}
 $body$
 
 $before-bib.tex()$
