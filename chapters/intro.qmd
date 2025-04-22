@@ -1,6 +1,6 @@
 # Introduction
 
-My thesis aims to provide an explanation of BitTorrent that assumes as little prior knowledge as possible, along with an implementation of BitTorrent that allows you to visualize the protocol at work.
+My thesis is made up of two parts. The first is a specification-compliant implementation of the original version of BitTorrent, while the second is this document, which aims to explain the BitTorrent protocol while assuming as little prior knowledge as possible.
 
 ## What is BitTorrent?
 
@@ -58,9 +58,28 @@ An overview of the BitTorrent process
 
 ## What did I produce?
 
-There are many implementations of BitTorrent out there, just as there are many explanations of how BitTorrent works. However, the existing implementations of BitTorrent are designed primarily for use rather than explanatory purposes, and the existing explanations (by and large) assume a fair bit of background knowledge and/or gloss over parts of the protocol.
+There are many existing implementations of BitTorrent, just as there are many explanations of how the protocol works. However, many existing implementations suffer from one or more of the following weaknesses:
 
-\todo{how is mine different?}
+- **Written in memory-unsafe languages like C/C++**. C and C++ are notorious for their propensity to harbor subtle memory safety bugs, which many modern languages like Swift prevent automatically.
+- **Over two decades old**. Although there's nothing inherently wrong with old software, there have been numerous developments and extensions to the BitTorrent protocol over its lifetime. A fresh start allowed me to plan ahead for everything that I wanted to support.
+- **Inconsistent support for extensions**. As a consequence of the above, many existing clients are missing support for some functionality.
+- **Hidden unsafe behavior**. A (somewhat) recent bug in qBittorrent, a popular BitTorrent client, meant that it silently ignored an entire category of security errors.[^tlsintrackers] My implementation takes this as an inspiration and makes sure not to do similarly.
+
+[^tlsintrackers]: For the curious, the issue was that qBittorrent ignored all SSL errors when connecting to trackers, which left it trivially vulnerable to man-in-the-middle attacks. This likely had no adverse effect besides wasting time and bandwidth.
+
+That said, my implementation (at least within the scope of my thesis) is not meant to compete directly with existing BitTorrent clients. Instead, it's meant to be:
+
+- fully compliant with the original specification
+- well architectured
+- well documented
+
+Primarily, it is for learning purposes, both my own and for anyone reading the source code.
+
+Likewise, most existing implementations assume a fair bit of background knowledge and/or gloss over parts of the protocol. Even @noauthor_bittorrent_2017, which goes into fairly high detail, assumes a fair level of familiarity with various aspects of computer science.
+
+This document aims to explain BitTorrent while assuming as little background as possible. To that end, I have provided various "primers" on some core concepts that I refer to frequently as appendices. These obviously are not comprehensive, and better materials can no doubt be found on the internet, but these should provide enough knowledge to make the rest of the thesis understandable.
+
+In pursuit of the same goal, the chapters follow a similar structure. Each chapter begins with a conceptual overview of the topic that should be approachable to everyone before delving into increasing levels of detail, culminating in implementation-level details that may not interest all audiences.
 
 ## The elephant in the room: piracy
 
