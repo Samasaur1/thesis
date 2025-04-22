@@ -12,25 +12,25 @@ BitTorrent is a distributed process, but even a distributed process needs to sta
 
 ## Structure of a metainfo file
 
-As described above, every metainfo file is a dictionary. Each one has some top-level keys, including the `info` key, which maps to a dictionary containing a number of sub-keys. There are a given set of keys defined in @bep0003 that must be in the metainfo file for it to be valid. There are also some keys commonly used by the community, as well as some keys defined in extensions to the original protocol (described in more detail in @sec-extensions-metainfo-file)).
+Every metainfo file is a dictionary. Each one has some top-level keys, including the `info` key, which maps to a dictionary containing a number of sub-keys. There are a given set of keys defined in @bep0003 that must be in the metainfo file for it to be valid. There are also some keys commonly used by the community, as well as some keys defined in extensions to the original protocol (described in more detail in @sec-extensions-metainfo-file)).
 
 There are two versions of the metainfo file that I will describe: "v1" metainfo files (described in the original BitTorrent specification [@bep0003]) and "v2" metainfo files (described in version 2 of the BitTorrent specification [@bep0052]). Although both versions follow the general format laid out above, and there are many similarities, there is a large difference in how the file(s) that make up the torrent are represented.
 
 ### v1 metainfo files
 
-Unless specified otherwise, all keys listed below must be present for a v1 metainfo file to be valid. Note also that these keys are those and only those defined in the original BitTorrent specification; other keys (and the specifications that define them) are detailed in @sec-extensions-metainfo-file.
-
-\todo{"specifications that define them" -> "BEPs"?}
+Unless specified otherwise, all keys listed below must be present for a v1 metainfo file to be valid. Note also that (with the exception of @sec-metainfo-files-v1-community-keys and @sec-metainfo-files-v1-info-dict-community-keys) these keys are those and only those defined in the original BitTorrent specification; other keys (and the specifications that define them) are detailed in @sec-extensions-metainfo-file.
 
 #### Top-level keys
 
 `announce`
-:   The URL of the tracker (see @sec-trackers for more details). In practice, this value is usually superseded by the tracker URLs as defined in @bep0012 (see @sec-extensions-multitracker for more details); nevertheless, it still must always be present.
+:   The URL of the tracker to use to find peers (see @sec-trackers for more details). In practice, this value is usually superseded by the tracker URLs as defined in @bep0012 (see @sec-extensions-multitracker for more details); nevertheless, it still must always be present.
 
 `info`
-:   The info dictionary, which in turn contains its own sub-keys (detailed in @sec-metainfo-files-v1-info-dict). The distinction between keys at the top-level of the metainfo file and keys in the info dictionary is important because the serialized form of the info dictionary is used as an identifier for the torrent as a whole (see @sec-metainfo-files-info-hash for more details). This allows for changing out the tracker URL without invalidating the entire torrent.
+:   The info dictionary, which in turn contains its own sub-keys (detailed in @sec-metainfo-files-v1-info-dict). The distinction between keys at the top-level of the metainfo file and keys in the info dictionary is important because the serialized form of the info dictionary is used as an identifier for the torrent as a whole (see @sec-metainfo-files-info-hash for more details). This allows for changing out the tracker URL (or other top-level keys described in @sec-extensions-metainfo-files) without invalidating the entire torrent, which is done to replace trackers (or DHT nodes (@sec-extensions-dht) or direct download mirrors (@sec-extensions-http-hoffman or @sec-extensions-http-getright)) that no longer exist without changing the content of the torrent or breaking compatibility with the existing swarm[^swarm] of peers.
 
-##### Optional (community-specified) keys
+[^swarm]: The *swarm* is BitTorrent's term for a network of peers all participating in the BitTorrent process for the same torrent.
+
+##### Optional (community-specified) keys {#sec-metainfo-files-v1-community-keys}
 
 The following keys are not part of the original BitTorrent specification, and thus are not required for a metainfo file to be valid. 
 
@@ -64,8 +64,7 @@ The following keys are not part of the original BitTorrent specification, and th
 
     The value associated with the `files` key is a list of dictionaries. Each dictionary in the list represents one file downloaded by the torrent, and contains two keys: `length`, which is the length of the given file (in bytes); and `path`, which is a list of strings that represent the path to the given file relative to the directory chosen for the torrent to be downloaded to.
 
-    For example, if the `files` key has the value  
-    `ld6:lengthi1e4:pathl9:first.txteed6:lengthi5e4:pathl9:my_folder10:second.txteee`:
+    Consider the following example value for the `files` key[^bencodeexamples]:
 
     ```bencode
     l
@@ -89,11 +88,13 @@ The following keys are not part of the original BitTorrent specification, and th
     e
     ```
 
-    then it is describing two files. The first is 1 byte long and will be saved to `first.txt` inside the directory that the user chooses to save the torrent to. The second is 5 bytes long and will be saved to `second.txt` in a directory named `my_folder` inside the directory that the user chooses to save the torrent to.
+    This example describes two files. The first is 1 byte long and will be saved to `first.txt` inside the directory that the user chooses to save the torrent to. The second is 5 bytes long and will be saved to `second.txt` in a directory named `my_folder` inside the directory that the user chooses to save the torrent to.
 
     Be aware that the order of the files given under the `files` key does matter. This is because, for the purposes of splitting a torrent into pieces, BitTorrent pretends that a multi-file torrents is really a extremely long single-file torrent, and it does so by concatenating all the files listed under the `files` key *in the order they are listed*. This is the only time that the order of these files is relevant, though it must be kept in mind in various parts of the implementation.
 
-##### Optional (community-specified) keys
+[^bencodeexamples]: This example, and all further bencode excerpts in this chapter, are "pretty-printed" --- nicely formatted to show nesting levels. Recall from @sec-bencode, however, that spacing is relevant in bencode and that the true form of this bencode would not have the newlines or indentation.
+
+##### Optional (community-specified) keys {#sec-metainfo-files-v1-info-dict-community-keys}
 
 The following keys are not part of the original BitTorrent specification, and thus are not required for a metainfo file to be valid. 
 
@@ -141,9 +142,7 @@ Unless specified otherwise, all keys listed below must be present for a v2 metai
 `file tree`
 :   The value of this key is a nested directory structure that, like the `files` key in a v1 metainfo file, describes the file(s) that make up the torrent. However, the structure is more complicated. Each non-empty dictionary key represents a path component[^unixpaths] of a file. When the entire path of a file has been described in terms of nested dictionaries, there is another nested dictionary with an empty key, which in turn maps to a dictionary containing `length` and `pieces root` keys. An example will make this structure easier to grasp:
 
-    \todo{fix this overflow}
-    For example, if the `files` key has the value  
-    `d9:first.txtd0:d6:lengthi1e11:pieces root32:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaee9:my_folderd10:second.txtd0:d6:lengthi5e11:pieces root32:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeeee`:
+    Consider the following example for the `file tree` key:
 
     ```bencode
     d
@@ -173,7 +172,7 @@ Unless specified otherwise, all keys listed below must be present for a v2 metai
     e
     ```
 
-    then it is describing two files. The first is 1 byte long and will be saved to `first.txt` inside the directory that the user chooses to save the torrent to. The second is 5 bytes long and will be saved to `second.txt` in a directory named `my_folder` inside the directory that the user chooses to save the torrent to. (I have deliberately chosen to use the same file structure as the example given in @sec-metainfo-files-v1-info-dict for purposes of comparison.)
+    This example describes two files. The first is 1 byte long and will be saved to `first.txt` inside the directory that the user chooses to save the torrent to. The second is 5 bytes long and will be saved to `second.txt` in a directory named `my_folder` inside the directory that the user chooses to save the torrent to. (I have deliberately chosen to use the same file structure as the example given in @sec-metainfo-files-v1-info-dict for purposes of comparison.)
 
     In the final level of nested dictionaries, the `length` key describes the length in bytes of the given file. The `pieces root` key is the root hash of a Merkle tree constructed from the parts of the file. See @sec-metainfo-files-merkle-trees for more information.
 
@@ -304,7 +303,7 @@ To avoid the undesirable situation where a client that only supports v1 metainfo
 
 Hybrid torrents simply include the necessary keys in the info dictionary for both v1 and v2 metainfo files, making sure that the different representations of files and different hash formats both correspond to the same actual files. When a v1-only or v2-only client loads a hybrid metainfo file, they simply ignore the keys for the other version and everything works perfectly.
 
-Clients can also handle hybrid torrents specifically (mostly equivalent to supporting both v1 and v2 metainfo files separately). In this case, they must verify that hashes match both piece hash formats[^upgradingconnections].
+Clients can also handle hybrid torrents specifically (mostly equivalent to supporting both v1 and v2 metainfo files separately). In this case, they must verify that hashes match both piece hash formats.[^upgradingconnections]
 
 [^upgradingconnections]: A client explicitly supporting hybrid torrents can also "upgrade" a connection made using the v1 infohash to the v2 connection format, which allows for some new message types. The peer wire protocol is detailed in @sec-peer-wire-protocol.
 
@@ -315,9 +314,9 @@ Torrents need an identifier throughout the process, and BitTorrent derives the i
 \todo{anything more to say about info hashes?}
 \todo{that is one big paragraph. break up?}
 
-## examples
+## Examples
 
-Here's an example v1 metainfo file (shown as nicely-formatted bencode):
+Here's an example v1 metainfo file:
 ```bencode
 d
   8:announce
@@ -338,7 +337,7 @@ d
 e
 ```
 
-## parsing
+## Parsing
 
 the actual parsing is pretty simple because i just use the bencode decoder described in @sec-bencode.
 

@@ -28,7 +28,7 @@ Suppose Alice has a file that she would like to share (`sams-thesis.pdf`). She p
 
 If Bob then wants to download Alice's file (`sams-thesis.pdf`), he performs the following steps:
 
-1. He begins by acquiring the metainfo file Alice generated (`sams-thesis.pdf.torrent`).
+1. He begins by acquiring[^getmetainfofiles] the metainfo file Alice generated (`sams-thesis.pdf.torrent`).
 1. He opens it in his BitTorrent client.
 1. Bob's client parses the metainfo file and connects to the *tracker* listed in the file.
 
@@ -40,6 +40,7 @@ If Bob then wants to download Alice's file (`sams-thesis.pdf`), he performs the 
     The peer wire protocol defines how Bob's client can request and receive pieces of `sams-thesis.pdf` from Alice, which it does automatically.
     As Bob's client receives pieces of `sams-thesis.pdf`, it verifies that they are correct (uncorrupted and untampered-with) against information stored in `sams-thesis.pdf.torrent`[^verification], and once it has all the pieces of `sams-thesis.pdf`, it checks that the file as a whole is correct.
 
+[^getmetainfofiles]: It doesn't matter how Bob gets the metainfo file. Theoretically, he could even download the metainfo file itself via BitTorrent, but then he'd need the meta-metainfo file (`sams-thesis.pdf.torrent.torrent`), *ad nauseum*. Much easier is to transfer it via email, or FTP, or web hosting, or some MegaShareUpload site, or AIM direct connect, or Dropbox, or a flash drive, etc.
 [^verification]: The method for performing these checks is described in more detail in @sec-metainfo-files, but in short we check the hash of each piece against its hash stored in the `sams-thesis.pdf.torrent`. This allows us to verify each piece of the file without needing to store each piece in `sams-thesis.pdf.torrent` in its entirety --- in which case there'd be no need to use BitTorrent, since we'd have `sams-thesis.pdf` already!
 
 Bob has now successfully downloaded a file using BitTorrent!

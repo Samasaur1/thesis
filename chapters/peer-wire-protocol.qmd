@@ -32,9 +32,11 @@ The peer wire protocol is built on top of TCP. Feel free to peruse @sec-networki
 
 These strengths mean that the peer wire protocol doesn't need to worry about messages being lost or corrupt.
 
-## How do we begin the peer wire protocol
+## Beginning the peer wire protocol
 
-A peer connection begins by creating a TCP connection (including the TCP handshake). Immediately thereafter, the peer wire protocol handshake occurs over that TCP connection.
+A peer connection begins by creating a TCP connection (including the TCP handshake[^tcphandshake]). Immediately thereafter, the peer wire protocol handshake occurs over that TCP connection.
+
+[^tcphandshake]: TCP connections begin with a handshake to ensure that both sides are "speaking the same language" and to initiate the reliable connection. See @sec-networking-primer for more information.
 
 ### Initiating the TCP connection {#sec-peer-wire-protocol-listening-socket}
 
@@ -63,6 +65,7 @@ To begin a peer wire connection, both peers must send a *handshake*. This is a s
 ```
 
 \todo{insert colored hexdump diagram here}
+\todo{explain hexdump diagram format}
 
 Let's break that down. The first byte is `0x13`, which corresponds to decimal 19. This specifies the length of the subsequent ASCII string representation of the protocol name in bytes, and indeed, if we read the next 19 bytes, they are the string `BitTorrent protocol` in ASCII. This allows other protocols to exist between peers, since they will be differentiable by name.
 
@@ -92,7 +95,7 @@ Once both peers have sent and received the handshake, they must check that the v
 
 ## Types of messages
 
-Now that handshakes have been exchanged, the rest of the connection is an unending stream of messages.
+Once handshakes have been exchanged, the rest of the connection is an unending stream of messages.
 
 Each message is made up of a four-byte[^endianness] integer[^signedness] that indicates the length of the rest of the message, followed by a one-byte message type identifier, followed by the payload of the message.
 
@@ -103,12 +106,12 @@ As a special case, when the length prefix is 0, the message is a keep-alive[^kee
 
 [^keepalive]: A keep-alive is a message send over a connection solely to prevent that connection from being closed.
 
-There are nine message types defined in @bep0003. @sec-extensions-peer-wire-protocol details extensions which define more message types.
+There are nine message types defined in @bep0003. Message types defined in extensions are deferred to @sec-extensions-peer-wire-protocol.
 
 +--------+-------------------------------------------------------------------+--------------------------------------------------------------------------------------------+
 | **ID** | **Payload**                                                       | **Description**                                                                            |
 +========+===================================================================+============================================================================================+
-| 0      | None                                                              | This peer is now choking us. See @sec-peer-wire-protocol-choking-and-interest.             |
+| 0      | None                                                              | This peer is now choking us (see @sec-peer-wire-protocol-choking-and-interest).            |
 +--------+-------------------------------------------------------------------+--------------------------------------------------------------------------------------------+
 | 1      | None                                                              | This peer is no longer choking us. See @sec-peer-wire-protocol-choking-and-interest.       |
 +--------+-------------------------------------------------------------------+--------------------------------------------------------------------------------------------+
