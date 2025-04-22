@@ -4,7 +4,7 @@ project:
   post-render: ./template/prelims/cleanup.bash
 
 book:
-  title: "Bit by Bit: Sam's Thesis"
+  title: "Bit by Bit: Implementing the BitTorrent peer-to-peer file-sharing protocol"
   author: "Sam Gauck"
   date: "May 2025"
   date-format: "MMMM YYYY"
