@@ -21,7 +21,6 @@ book:
     - chapters/extensions.qmd
   appendices:
     - chapters/networking-primer.qmd
-    - chapters/language-and-technology.qmd
     - chapters/concurrency-primer.qmd
     - chapters/filesystem-primer.qmd
     - chapters/git-revisions.qmd
