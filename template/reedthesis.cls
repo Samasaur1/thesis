@@ -169,7 +169,6 @@
 \if@reedthesis@foliobinding
     \RequirePackage[
         margin=1in,
-        bindingoffset=0.5in,
         % paperwidth=7.117in
         paperheight=13.136in
     ]{geometry}
