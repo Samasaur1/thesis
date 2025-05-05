@@ -2,7 +2,9 @@
   rev,
   shortRev,
   lastModified,
+  foliobinding ? false,
   pkgs,
+  lib,
   ...
 }:
 
@@ -42,7 +44,7 @@ let
 
       echo "Overriding HOME to avoid complaints from quarto"
 
-      quarto render --to pdf --no-cache -M "commitRev:${rev}" -M "commitShortRev:${shortRev}" -M "commitDate:''${DATE}" -o thesis.pdf --output-dir $out
+      quarto render --to pdf --no-cache -M "commitRev:${rev}" -M "commitShortRev:${shortRev}" -M "commitDate:''${DATE}" ${lib.optionalString foliobinding "-M classoption:foliobinding"} -o thesis.pdf --output-dir $out
 
       runHook postBuild
     '';

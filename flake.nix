@@ -32,6 +32,11 @@
           inherit rev;
           inherit (self) shortRev lastModified;
         };
+        thesis-forbinding = pkgs.callPackage ./. {
+          inherit rev;
+          inherit (self) shortRev lastModified;
+          foliobinding = true;
+        };
       });
 
       devShells = define (pkgs: {
