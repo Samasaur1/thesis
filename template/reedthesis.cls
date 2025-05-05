@@ -25,6 +25,9 @@
 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{reedthesis}[2004/01/27 The Reed College Thesis Class]
+\newif\if@reedthesis@foliobinding
+\@reedthesis@foliobindingfalse
+\DeclareOption{foliobinding}{\@reedthesis@foliobindingtrue}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{book}}
 \ProcessOptions\relax
 \LoadClass{book}
@@ -163,10 +166,19 @@
 \let\RToldcleardoublepage\cleardoublepage
 \renewcommand{\cleardoublepage}{\RTcleardoublepage}
 
-\RequirePackage[
-    margin=1in,
-    bindingoffset=0.5in
-]{geometry}
+\if@reedthesis@foliobinding
+    \RequirePackage[
+        margin=1in,
+        bindingoffset=0.5in,
+        % paperwidth=7.117in
+        paperheight=13.136in
+    ]{geometry}
+\else
+    \RequirePackage[
+        margin=1in,
+        bindingoffset=0.5in
+    ]{geometry}
+\fi
 
 \def\division#1{\gdef \@division{#1}}
 \def\@division{\@latex@warning@no@line{No \noexpand\division given}}
