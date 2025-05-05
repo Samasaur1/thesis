@@ -13,8 +13,6 @@ Once the client is told where to find peers by the tracker (@sec-trackers), it c
 A typical BitTorrent download
 :::
 
-Let's reference @fig-peer-wire-protocol @fig-peer-wire-protocol-first-piece @fig-peer-wire-protocol-more-pieces @fig-peer-wire-protocol-complete
-
 ## What is the peer wire protocol?
 
 Although the client now knows how to find and connect to other peers in the swarm for the torrent that it wants, peers still do not know how to understand each other.

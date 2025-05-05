@@ -289,4 +289,4 @@ To resolve this issue, I set the decoder option to error on unknown keys, and ad
 
 I later came up with another potential solution that I have not yet had the opportunity to try. Instead of decoding and reencoding using the synthesized `Codable` conformance, I could manually implement the `init(from:)` method on the type to iterate over all the keys in the decoder and reencode *then* to generate and store the info hash, thus handling even keys that I haven't specified in the type itself.
 
-Either way, I also plan to add a new type that isn't directly `Codable` but can be constructed from the `Codable` types, that makes it easier to access the properties i actually care about (including standardizing file access even for single-file v1 torrents).
+Either way, I also plan to add a new type that isn't directly `Codable` but can be constructed from the `Codable` types, that makes it easier to access the properties I actually care about (including standardizing file access even for single-file v1 torrents).
