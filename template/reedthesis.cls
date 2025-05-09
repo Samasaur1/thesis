@@ -75,8 +75,9 @@
 		    
 % from batess thesis, from Sterling Paramour's mods:
 %\newfont{\reallyfuckinbig}{CoelacanthBold-osf-ot1 scaled 20000}
-%\newfont{\reallyfuckinbig}{ptmb scaled 20000}
-\newfont{\reallyfuckinbig}{pplb scaled 20000}
+% \newfont{\reallyfuckinbig}{ptmb scaled 20000}
+% \newfont{\reallyfuckinbig}{pplb scaled 20000}
+\newcommand{\reallyfuckinbig}{\fontsize{200}{0}\selectfont}
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 
 \let\oldappendix\appendix
@@ -89,13 +90,18 @@
     \ifnum \c@secnumdepth >\m@ne
 %      \if@mainmatter
         \large \bfseries
-        \if@inappendix
-        A~P~P~E~N~D~I~X \hspace{0.5cm}
-        \else
-        C~H~A~P~T~E~R \hspace{0.5cm}
-        \fi
-        \baselineskip 30pt
-        \space \reallyfuckinbig \thechapter
+        \begin{minipage}[t][150pt][t]{\textwidth}
+            \vfill
+            \raggedleft
+            \baselinestretch \phantom{0pt}
+            \if@inappendix
+            A~P~P~E~N~D~I~X \hspace{0.5cm}
+            \else
+            C~H~A~P~T~E~R \hspace{0.5cm}
+            \fi
+            \space \reallyfuckinbig \thechapter
+        \end{minipage}
+        \vskip 20\p@
         \par\nobreak
         \HRule
         \par\nobreak
@@ -110,7 +116,7 @@
   }}
 
 \def\@bibhead{%
-  \vspace*{120\p@}%
+  \vspace*{138.2\p@}%
   {\parindent \z@ \raggedleft
     \normalfont
     \interlinepenalty\@M
