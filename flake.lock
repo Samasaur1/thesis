@@ -1,20 +1,61 @@
 {
   "nodes": {
-    "nixpkgs": {
+    "chromacode-src": {
+      "flake": false,
       "locked": {
-        "lastModified": 0,
-        "narHash": "sha256-Tbk1MZbtV2s5aG+iM99U8FqwxU/YNArMcWAv6clcsBc=",
-        "path": "/nix/store/l9nb64iii15y0nr37qrs1cfm6rlpg6gh-source",
-        "type": "path"
+        "lastModified": 1727419890,
+        "narHash": "sha256-dqk8K/pjxLx8PiS6SO3rMzvTj7dYXJueJAvyJWehy6s=",
+        "owner": "TomLebeda",
+        "repo": "chroma_code",
+        "rev": "bc03b96e42096dde534546b60431bdbd781c47dc",
+        "type": "github"
       },
       "original": {
-        "id": "nixpkgs",
-        "type": "indirect"
+        "owner": "TomLebeda",
+        "repo": "chroma_code",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1747250049,
+        "narHash": "sha256-n0VxP3uLGZYXCqS8jnDOyqzD7DjsC0GMw3QUp0F5mQ4=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "4be1f0c9bbaef52cf0e8e1cd13ac67aadc31c625",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "type": "github"
       }
     },
     "root": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "chromacode-src": "chromacode-src",
+        "nixpkgs": "nixpkgs",
+        "tree-sitter-wrapped": "tree-sitter-wrapped"
+      }
+    },
+    "tree-sitter-wrapped": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1747216475,
+        "narHash": "sha256-9x4j30k9OPrqJaBEQMqPjRQ5uaMJRDk6uod453bstWQ=",
+        "owner": "Samasaur1",
+        "repo": "tree-sitter-wrapped",
+        "rev": "6fbf87c58e030388894e10ab72844a2688bd3dc8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Samasaur1",
+        "repo": "tree-sitter-wrapped",
+        "type": "github"
       }
     }
   },

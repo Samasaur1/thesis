@@ -5,10 +5,21 @@
   foliobinding ? false,
   pkgs,
   lib,
+  inputs,
   ...
 }:
 
 let
+  chroma_code = pkgs.rustPlatform.buildRustPackage rec {
+    pname = "chromacode";
+    version = "1.1.0";
+
+    src = inputs.chromacode-src;
+
+    cargoHash = "sha256-zqqu+a1tLkFlPQuo0qzXtBIPUL5yBOUOBWwnypLVSI8=";
+  };
+  tree-sitter = inputs.tree-sitter-wrapped.packages.${pkgs.system}.default;
+
   thesis = pkgs.stdenv.mkDerivation {
     pname = "thesis";
     version = "0.1.0";
@@ -19,6 +30,8 @@ let
       pkgs.quarto
       pkgs.texliveFull
       pkgs.tzdata
+      chroma_code
+      tree-sitter
     ];
 
     patchPhase = ''
