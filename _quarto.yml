@@ -31,6 +31,7 @@ nocite: |
   @*
 
 filters:
+  - template/treesitter-highlighting.lua
   - quarto
   - template/remove-appendix-part.lua
 
