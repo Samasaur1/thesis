@@ -1,10 +1,23 @@
 {
   description = "My Reed College senior thesis";
 
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs";
+    chromacode-src = {
+      url = "github:TomLebeda/chroma_code";
+      flake = false;
+    };
+    tree-sitter-wrapped = {
+      url = "github:Samasaur1/tree-sitter-wrapped";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
+
   outputs =
-    {
+    inputs@{
       self,
       nixpkgs,
+      tree-sitter-wrapped,
       ...
     }:
     let
@@ -29,18 +42,18 @@
     {
       packages = define (pkgs: {
         thesis = pkgs.callPackage ./. {
-          inherit rev;
+          inherit rev inputs;
           inherit (self) shortRev lastModified;
         };
         thesis-forbinding = pkgs.callPackage ./. {
-          inherit rev;
+          inherit rev inputs;
           inherit (self) shortRev lastModified;
           foliobinding = true;
         };
       });
 
       devShells = define (pkgs: {
-        thesis = pkgs.callPackage ./shell.nix { };
+        thesis = pkgs.callPackage ./shell.nix { inherit inputs; };
       });
 
       formatter = define (pkgs: pkgs.nixfmt-rfc-style);
