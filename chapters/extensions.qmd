@@ -160,6 +160,8 @@ This extension is specified in @bep0015. It allows trackers to be contacted over
 
 ### Superseeding
 
+This extension is specified in @bep0016. It defines a strategy for seeds to selectively inform other peers of which pieces they have in order to share rarer pieces first.
+
 ### HTTP Seeding (Hoffman-style) {#sec-extensions-http-hoffman}
 
 This extention, specified in @bep0017, modifies the metainfo file. It allows treating direct download sites as a peer in the swarm.
