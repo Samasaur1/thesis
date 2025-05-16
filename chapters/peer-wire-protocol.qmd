@@ -75,7 +75,7 @@ Following the protocol name are eight extension bytes. In this example, as in th
 
 The next 20 bytes are the infohash of the torrent. When you're making an outgoing connection, this is simple, because you find peers by torrent, so you use that torrent's info hash^[that is, the process goes: 1) you ask the tracker "give me peers for torrent X"; 2) the tracker says "here's peer A"; 3) you connect to peer A and use the infohash for torrent X in the handshake]. However, it's a little more complicated for incoming connections. While you could technically open a new listening socket for each torrent you are downloading and send the corresponding port with each tracker request, most clients instead use a single listening socket for all torrents, wait for the incoming connection to send the infohash that they want, check whether we're actually participating in that torrent, and respond with the same infohash if so. Note that this makes it even more important to send the info hash first when making an outgoing connection.
 
-After the infohash is the peer ID, which uniquely identifies a torrent client over the course of a download.
+After the infohash is the peer ID, which uniquely identifies a torrent client over the course of a download. Recall from @sec-trackers-request-parameters that peer IDs commonly conform to a common format (shown above in the handshake hexdump). When the peer information received from a tracker includes a peer ID, it must match the peer ID received in the handshake.
 
 Once both peers have sent and received the handshake, they must check that the values they received are what they expected, or else they must close the connection.
 
