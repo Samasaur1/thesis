@@ -114,11 +114,11 @@ There are nine message types defined in @bep0003. Message types defined in exten
 +================+========+=============================================================+============================================================================================+
 | choke          | 0      | None                                                        | This peer is now choking us (see @sec-peer-wire-protocol-choking-and-interest).            |
 +----------------+--------+-------------------------------------------------------------+--------------------------------------------------------------------------------------------+
-| unchoke        | 1      | None                                                        | This peer is no longer choking us. See @sec-peer-wire-protocol-choking-and-interest.       |
+| unchoke        | 1      | None                                                        | This peer is no longer choking us (see @sec-peer-wire-protocol-choking-and-interest).      |
 +----------------+--------+-------------------------------------------------------------+--------------------------------------------------------------------------------------------+
-| interested     | 2      | None                                                        | This peer is now interested in us. See @sec-peer-wire-protocol-choking-and-interest.       |
+| interested     | 2      | None                                                        | This peer is now interested in us (see @sec-peer-wire-protocol-choking-and-interest).      |
 +----------------+--------+-------------------------------------------------------------+--------------------------------------------------------------------------------------------+
-| not interested | 3      | None                                                        | This peer is no longer interested in us. See @sec-peer-wire-protocol-choking-and-interest. |
+| not interested | 3      | None                                                        | This peer is no longer interested in us (see @sec-peer-wire-protocol-choking-and-interest).|
 +----------------+--------+-------------------------------------------------------------+--------------------------------------------------------------------------------------------+
 | have           | 4      | A single four-byte integer, `index`.                        | This peer has acquired a new piece with index `index`.                                     |
 +----------------+--------+-------------------------------------------------------------+--------------------------------------------------------------------------------------------+
