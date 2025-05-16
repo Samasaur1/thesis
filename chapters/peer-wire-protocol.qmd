@@ -84,7 +84,7 @@ Once both peers have sent and received the handshake, they must check that the v
 +-----------------+--------------------------------------------------------------------+-------------------------------------------------------------------------+
 | Extension bytes | No restriction                                                     | No restriction                                                          |
 +-----------------+--------------------------------------------------------------------+-------------------------------------------------------------------------+
-| Infohash        | Send the infohash that they used to get the peer from the tracker, | Recieve an infohash that corresponds to a torrent they are downloading, |
+| Infohash        | Send the infohash that they used to get the peer from the tracker, | Receive an infohash that corresponds to a torrent they are downloading, |
 |                 | receive the same infohash back                                     | send the same infohash back                                             |
 +-----------------+--------------------------------------------------------------------+-------------------------------------------------------------------------+
 | Peer ID         | Receive the peer ID they got from the tracker (if present)         | No restriction                                                          |
