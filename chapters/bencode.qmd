@@ -327,7 +327,7 @@ func decodeNil(forKey key: Key) throws -> Bool {
     return !self.contains(key)
 }
 ```
-which is essentially just saying "yes, the value for a given key is `nil` iff I don't have a subcontainer for that key."
+which is essentially just saying "yes, the value for a given key is `nil` if and only if I don't have a subcontainer for that key."
 
 #### Unknown/unexpected keys in dictionaries {#sec-bencode-parsing-unknown-keys}
 
@@ -365,7 +365,7 @@ struct Example: Codable {
 }
 ```
 
-In our code handling `KeyedContainer`s, we get dictionary keys as strings, which we then must parse into something that conforms to CodingKey. If we want to restrict to only the keys expected by the type, we can use the failable initializer `Key(stringValue:)`, which will return a `CodingKey` iff the given string key is expected by the type. If the key is not expected by the type, then we throw a decoding error.
+In our code handling `KeyedContainer`s, we get dictionary keys as strings, which we then must parse into something that conforms to CodingKey. If we want to restrict to only the keys expected by the type, we can use the failable initializer `Key(stringValue:)`, which will return a `CodingKey` if and only if the given string key is expected by the type. If the key is not expected by the type, then we throw a decoding error.
 
 If we want to accept any key, even unexpected keys, we need to use a type conforming to `CodingKey` whose creation will always succeed. I created an `AnyCodingKey` type that does exactly this, taking a string and using it as a key.
 

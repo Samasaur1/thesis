@@ -227,7 +227,7 @@ BitTorrent defines a pair of flags called *choking* and *interest* to prevent ne
 
 When a peer is choking us, that means that the peer will not send any chunks of the file. All outstanding requests should be considered to be canceled, and new requests will be ignored and should not be sent until the peer is no longer choking us. (Likewise, when we choke a peer, we will not share chunks of the file and can ignore requests for chunks of the file.)
 
-When a peer is interested in us, that means there is a piece we have that the peer wants to download and would download if unchoked (likewise, we should tell a peer that we are interested iff there is a piece they have that we would download). This flag should be kept up to date whether or not we are actively being choked.
+When a peer is interested in us, that means there is a piece we have that the peer wants to download and would download if unchoked (likewise, we should tell a peer that we are interested if and only if there is a piece they have that we would download). This flag should be kept up to date whether or not we are actively being choked.
 
 Connections start out choked and uninterested on both ends.
 
