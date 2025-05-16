@@ -4,6 +4,8 @@ This document was last updated on \commitDate.
 
 The revisions of the code I wrote are as follows:
 
+\small
+
 [BencodeKit](https://github.com/Samasaur1/BencodeKit)
 :   [`0de14d20bb378489fca7846943ac5ebff31ee810`](https://github.com/Samasaur1/BencodeKit/tree/0de14d20bb378489fca7846943ac5ebff31ee810)
 
@@ -15,3 +17,5 @@ The revisions of the code I wrote are as follows:
 
 [{{< meta title >}}](https://github.com/Samasaur1/thesis)
 :   [`{{< meta commitRev >}}`](https://github.com/Samasaur1/thesis/tree/{{< meta commitRev >}})
+
+\normalsize
