@@ -51,7 +51,7 @@ Crucially, at this point Alice and Bob are entirely equal in the eyes of BitTorr
 
 ![We talk to the tracker to find peers](figures/intro-bittorrent-process-overview-tracker.tex){#fig-intro-bittorrent-process-overview-tracker}
 
-![We talk to peers to get the actual file](figures/intro-bittorrent-process-overview-peers.tex){#fig-intro-bittorrent-process-overview-peers}
+![We talk to peers to get the actual file](figures/intro-bittorrent-process-overview-peers.tex){#fig-intro-bittorrent-process-overview-peers width=90%}
 
 An overview of the BitTorrent process
 :::

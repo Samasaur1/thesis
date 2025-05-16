@@ -59,6 +59,8 @@ division: Mathematical and Natural Sciences
 department: Computer Science
 advisor: Erica Blum
 
+fontsize: 12pt
+
 format:
   html:
     theme: cosmo
