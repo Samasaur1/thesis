@@ -228,9 +228,7 @@ This describes a torrent with seven files: a PDF file, and six files nested with
 
 ![The equivalent file layout](metainfo-files-file-layout.tex){#fig-metainfo-files-file-layout}
 
-We can construct the path to a given file by joining the nested keys with path separators; for the highlighted example, the resulting path is `chapters/metainfo-files.qmd`.
-
-A v1 metainfo file will have the corresponding path components as elements in a list, which must also be joined with path separators.
+In both v1 and v2 metainfo files, we compute the paths to files by taking a list of strings and concatenating them together. In v1 metainfo files, the strings are elements in a list, so are easy to find and operate on. In contrast, v2 metainfo files store the strings as nested keys, such as in the highlighted example where the keys `chapters` and `metainfo-files.qmd` become the path `chapters/metainfo-files.qmd`.
 
 #### Piece hashes
 
