@@ -23,7 +23,7 @@ The solution is the  peer wire protocol, which defines a series of messages that
 
 Importantly, it is a bidirectional protocol, which means that the connecting and receiving ends of the connection are identical to the protocol; both can send any of the valid messages at any valid time. Specifically, this means that whether client A connected to client B or client B connected to client A, once the connection begins either side can request pieces from the other.
 
-The peer wire protocol is built on top of TCP. Feel free to peruse @sec-networking-primer for more background, but the important information about TCP in this context is that it is a *reliable* protocol. A TCP connection guarantees that messages sent on top of it will be:
+The peer wire protocol is built on top of TCP, which is a *reliable* protocol. A TCP connection guarantees that messages sent on top of it will be:
 
 1. received
 2. in-order
@@ -35,7 +35,7 @@ These strengths mean that the peer wire protocol doesn't need to worry about mes
 
 A peer connection begins by creating a TCP connection (including the TCP handshake[^tcphandshake]). Immediately thereafter, the peer wire protocol handshake occurs over that TCP connection.
 
-[^tcphandshake]: TCP connections begin with a handshake to ensure that both sides are "speaking the same language" and to initiate the reliable connection. See @sec-networking-primer for more information.
+[^tcphandshake]: TCP connections begin with a handshake to ensure that both sides are "speaking the same language" and to initiate the reliable connection.
 
 ### Initiating the TCP connection {#sec-peer-wire-protocol-listening-socket}
 

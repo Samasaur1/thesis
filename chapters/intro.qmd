@@ -77,9 +77,7 @@ Primarily, it is for learning purposes, both my own and for anyone reading the s
 
 Likewise, most existing implementations assume a fair bit of background knowledge and/or gloss over parts of the protocol. Even @noauthor_bittorrent_2017, which goes into fairly high detail, assumes a fair level of familiarity with various aspects of computer science.
 
-This document aims to explain BitTorrent while assuming as little background as possible. To that end, I have provided various "primers" on some core concepts that I refer to frequently as appendices. These obviously are not comprehensive, and better materials can no doubt be found on the internet, but these should provide enough knowledge to make the rest of the thesis understandable.
-
-In pursuit of the same goal, the chapters follow a similar structure. Each chapter begins with a conceptual overview of the topic that should be approachable to everyone before delving into increasing levels of detail, culminating in implementation-level details that may not interest all audiences.
+This document aims to explain BitTorrent while assuming as little background as possible. To that end, each chapter begins with a conceptual overview of the topic that should be approachable to everyone before delving into increasing levels of detail, culminating in implementation-level details that may not interest all audiences.
 
 ## The elephant in the room: piracy
 

@@ -20,9 +20,9 @@ book:
     - chapters/peer-wire-protocol.qmd
     - chapters/extensions.qmd
   appendices:
-    - chapters/networking-primer.qmd
-    - chapters/concurrency-primer.qmd
-    - chapters/filesystem-primer.qmd
+    # - chapters/networking-primer.qmd
+    # - chapters/concurrency-primer.qmd
+    # - chapters/filesystem-primer.qmd
     - chapters/git-revisions.qmd
 
 bibliography: bibliography.bib

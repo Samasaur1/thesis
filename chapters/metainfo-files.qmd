@@ -136,7 +136,7 @@ As for v1 metainfo files, the keys listed below must be present for a v2 metainf
 :   The version of the BitTorrent protocol that this metainfo file was designed to use. In v2 metainfo files, the value of this property is 2. While it would be ideal to have v1 metainfo files have a value of 1 for this property, we can't update the protocol specification without it being a new version, so we assume that no value implies 1 and all version from v2 on will have this key.
 
 `file tree`
-:   The value of this key is a nested directory structure that, like the `files` key in a v1 metainfo file, describes the file(s) that make up the torrent. However, the structure is more complicated. Each non-empty dictionary key represents a path component[^unixpaths] of a file. When the entire path of a file has been described in terms of nested dictionaries, there is another nested dictionary with an empty key, which in turn maps to a dictionary containing `length` and `pieces root` keys. An example will make this structure easier to grasp:
+:   The value of this key is a nested directory structure that, like the `files` key in a v1 metainfo file, describes the file(s) that make up the torrent. However, the structure is more complicated. Each non-empty dictionary key represents a path component of a file, which can be concatenated to compute the final path (just as in the `files` key for v1 metainfo files). When the entire path of a file has been described in terms of nested dictionaries, there is another nested dictionary with an empty key, which in turn maps to a dictionary containing `length` and `pieces root` keys. An example will make this structure easier to grasp:
 
     Consider the following example for the `file tree` key:
 
@@ -171,8 +171,6 @@ As for v1 metainfo files, the keys listed below must be present for a v2 metainf
     This example describes two files. The first is 1 byte long and will be saved to `first.txt` inside the directory that the user chooses to save the torrent to. The second is 5 bytes long and will be saved to `second.txt` in a directory named `my_folder` inside the directory that the user chooses to save the torrent to. (I have deliberately chosen to use the same file structure as the example given in @sec-metainfo-files-v1-info-dict for purposes of comparison.)
 
     In the final level of nested dictionaries, the `length` key describes the length in bytes of the given file. The `pieces root` key is the root hash of a Merkle tree constructed from the parts of the file. See @sec-metainfo-files-merkle-trees for more information.
-
-[^unixpaths]: See @sec-filesystem-primer for more information.
 
 #### Merkle trees {#sec-metainfo-files-merkle-trees}
 
