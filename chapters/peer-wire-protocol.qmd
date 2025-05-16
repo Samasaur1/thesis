@@ -109,35 +109,37 @@ As a special case, when the length prefix is 0, the message is a keep-alive[^kee
 
 There are nine message types defined in @bep0003. Message types defined in extensions are deferred to @sec-extensions-peer-wire-protocol.
 
-+----------------+--------+-------------------------------------------------------------+--------------------------------------------------------------------------------------------+
-| **Name**       | **ID** | **Payload**                                                 | **Description**                                                                            |
-+================+========+=============================================================+============================================================================================+
-| choke          | 0      | None                                                        | This peer is now choking us (see @sec-peer-wire-protocol-choking-and-interest).            |
-+----------------+--------+-------------------------------------------------------------+--------------------------------------------------------------------------------------------+
-| unchoke        | 1      | None                                                        | This peer is no longer choking us (see @sec-peer-wire-protocol-choking-and-interest).      |
-+----------------+--------+-------------------------------------------------------------+--------------------------------------------------------------------------------------------+
-| interested     | 2      | None                                                        | This peer is now interested in us (see @sec-peer-wire-protocol-choking-and-interest).      |
-+----------------+--------+-------------------------------------------------------------+--------------------------------------------------------------------------------------------+
-| not interested | 3      | None                                                        | This peer is no longer interested in us (see @sec-peer-wire-protocol-choking-and-interest).|
-+----------------+--------+-------------------------------------------------------------+--------------------------------------------------------------------------------------------+
-| have           | 4      | A single four-byte integer, `index`.                        | This peer has acquired a new piece with index `index`.                                     |
-+----------------+--------+-------------------------------------------------------------+--------------------------------------------------------------------------------------------+
-| bitfield       | 5      | A bitfield[^bitfield] with as many bits as there are pieces | This peer has all the pieces whose indices correspond to the set bits in the bitfield.     |
-|                |        | in the torrent being downloaded, padded to the next byte    | This message is only allowed as the first message after the handshake.                     |
-|                |        | boundary with zeros.                                        |                                                                                            |
-+----------------+--------+-------------------------------------------------------------+--------------------------------------------------------------------------------------------+
-| request        | 6      | Three four-byte integers, `index`, `offset`, and `length`.  | This peer wants a chunk of the piece with index `index`. The chunk they are                |
-|                |        |                                                             | requesting is `length` bytes long and starts `offset` bytes into the piece.                |
-+----------------+--------+-------------------------------------------------------------+--------------------------------------------------------------------------------------------+
-| piece          | 7      | Two four-byte integers, `index` and `offset`,               | This peer has just sent us a chunk of the piece with index `index`, starting `offset`      |
-|                |        | followed by arbitrary data of an arbitrary length.          | bytes into the piece. The arbitrary data at the end of the payload is the actual chunk     |
-|                |        |                                                             | of the piece.                                                                              |
-|                |        |                                                             |                                                                                            |
-|                |        |                                                             | This message is only sent in response to a `request` message that we sent to the peer.     |
-+----------------+--------+-------------------------------------------------------------+--------------------------------------------------------------------------------------------+
-| cancel         | 8      | Three four-byte integers, `index`, `offset`, and `length`.  | This peer is canceling a previous request that they sent us. The previous request had the  |
-|                |        |                                                             | same `index`, `offset`, and `length` values.                                               |
-+----------------+--------+-------------------------------------------------------------+--------------------------------------------------------------------------------------------+
++---------------------+--------+-------------------------------------------------------+--------------------------------------------------------------------------------------------+
+| **Name**            | **ID** | **Payload**                                           | **Description**                                                                            |
++=====================+========+=======================================================+============================================================================================+
+| choke               | 0      | None                                                  | This peer is now choking us (see @sec-peer-wire-protocol-choking-and-interest).            |
++---------------------+--------+-------------------------------------------------------+--------------------------------------------------------------------------------------------+
+| unchoke             | 1      | None                                                  | This peer is no longer choking us (see @sec-peer-wire-protocol-choking-and-interest).      |
++---------------------+--------+-------------------------------------------------------+--------------------------------------------------------------------------------------------+
+| interested          | 2      | None                                                  | This peer is now interested in us (see @sec-peer-wire-protocol-choking-and-interest).      |
++---------------------+--------+-------------------------------------------------------+--------------------------------------------------------------------------------------------+
+| not                 | 3      | None                                                  | This peer is no longer interested in us (see @sec-peer-wire-protocol-choking-and-interest).|
+|                     |        |                                                       |                                                                                            |
+| interested          |        |                                                       |                                                                                            |
++---------------------+--------+-------------------------------------------------------+--------------------------------------------------------------------------------------------+
+| have                | 4      | A single four-byte integer, `index`.                  | This peer has acquired a new piece with index `index`.                                     |
++---------------------+--------+-------------------------------------------------------+--------------------------------------------------------------------------------------------+
+| bitfield            | 5      | A bitfield[^bitfield] with as many bits as there are  | This peer has all the pieces whose indices correspond to the set bits in the bitfield.     |
+|                     |        | pieces in the torrent being downloaded, padded to the | This message is only allowed as the first message after the handshake.                     |
+|                     |        | next byte boundary with zeros.                        |                                                                                            |
++---------------------+--------+-------------------------------------------------------+--------------------------------------------------------------------------------------------+
+| request             | 6      | Three four-byte integers, `index`, `offset`, and      | This peer wants a chunk of the piece with index `index`. The chunk they are                |
+|                     |        | `length`.                                             | requesting is `length` bytes long and starts `offset` bytes into the piece.                |
++---------------------+--------+-------------------------------------------------------+--------------------------------------------------------------------------------------------+
+| piece               | 7      | Two four-byte integers, `index` and `offset`,         | This peer has just sent us a chunk of the piece with index `index`, starting `offset`      |
+|                     |        | followed by arbitrary data of an arbitrary length.    | bytes into the piece. The arbitrary data at the end of the payload is the actual chunk     |
+|                     |        |                                                       | of the piece.                                                                              |
+|                     |        |                                                       |                                                                                            |
+|                     |        |                                                       | This message is only sent in response to a `request` message that we sent to the peer.     |
++---------------------+--------+-------------------------------------------------------+--------------------------------------------------------------------------------------------+
+| cancel              | 8      | Three four-byte integers, `index`, `offset`, and      | This peer is canceling a previous request that they sent us. The previous request had the  |
+|                     |        | `length`.                                             | same `index`, `offset`, and `length` values.                                               |
++---------------------+--------+-------------------------------------------------------+--------------------------------------------------------------------------------------------+
 
 : Message types {#tbl-peer-wire-protocol-message-types}
 
