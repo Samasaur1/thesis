@@ -38,18 +38,35 @@
         "tree-sitter-wrapped": "tree-sitter-wrapped"
       }
     },
+    "tree-sitter-bencode": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1747362308,
+        "narHash": "sha256-RgPtrXIbRc8ZWsdvPp3ddX+K1LpExufpl1gD/S2jUEo=",
+        "owner": "Samasaur1",
+        "repo": "tree-sitter-bencode",
+        "rev": "033e919cbf80c260880304df89c5b7c7b14dc035",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Samasaur1",
+        "repo": "tree-sitter-bencode",
+        "type": "github"
+      }
+    },
     "tree-sitter-wrapped": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
-        ]
+        ],
+        "tree-sitter-bencode": "tree-sitter-bencode"
       },
       "locked": {
-        "lastModified": 1747216475,
-        "narHash": "sha256-9x4j30k9OPrqJaBEQMqPjRQ5uaMJRDk6uod453bstWQ=",
+        "lastModified": 1747362998,
+        "narHash": "sha256-Q0X1amh1gCbL+UOOnEvwJOabSK0KNlAnqscsuVMEH8w=",
         "owner": "Samasaur1",
         "repo": "tree-sitter-wrapped",
-        "rev": "6fbf87c58e030388894e10ab72844a2688bd3dc8",
+        "rev": "65db1fa23f1de6b5d5b5b8e823dd0da17542afed",
         "type": "github"
       },
       "original": {
