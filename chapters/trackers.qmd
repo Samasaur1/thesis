@@ -2,13 +2,13 @@
 
 Once the metainfo file has been parsed (as described in @sec-metainfo-files), the actual downloading of the torrent begins when the client contacts a *tracker* to find peers to which it can connect.
 
-::: {#fig-trackers layout-ncol=3}
+::: {#fig-trackers layout="[[1,1], [1]]"}
 
-![We connect to the tracker](trackers-figure-1.tex){#fig-trackers-connect-to-tracker width=90%}
+![We connect to the tracker](trackers-figure-1.tex){#fig-trackers-connect-to-tracker height=1.5in}
 
-![We receive peer addresses](trackers-figure-2.tex){#fig-trackers-tracker-response width=90%}
+![We receive peer addresses](trackers-figure-2.tex){#fig-trackers-tracker-response height=1.5in}
 
-![We can now connect to the peers](trackers-figure-3.tex){#fig-trackers-found-peers width=90%}
+![We can now connect to the peers](trackers-figure-3.tex){#fig-trackers-found-peers height=1.5in}
 
 Talking to a tracker to locate peers
 :::
