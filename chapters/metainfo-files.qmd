@@ -260,20 +260,20 @@ Here's an example v1 metainfo file:
 ```bencode
 d
   8:announce
-  ↳ 27:http://example.com/announce
+    27:http://example.com/announce
   8:encoding
-  ↳ 5:UTF-8
+    5:UTF-8
   4:info
-  ↳ d
-  ↳   6:length
-  ↳   ↳ i14e
-  ↳   4:name
-  ↳   ↳ 6:v1.txt
-  ↳   12:piece length
-  ↳   ↳ i16384e
-  ↳   6:pieces
-  ↳   ↳ 20:<data>
-  ↳ e
+    d
+      6:length
+        i14e
+      4:name
+        6:v1.txt
+      12:piece length
+        i16384e
+      6:pieces
+        20:332532dcfaa1cbf61e2a
+    e
 e
 ```
 
