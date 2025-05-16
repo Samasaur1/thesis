@@ -1,4 +1,4 @@
-SUPPORTED_FORMATS = pandoc.List({ "swift" })
+SUPPORTED_FORMATS = pandoc.List({ "swift", "bencode" })
 
 if quarto.format.is_html_output() then
   function CodeBlock(el)
